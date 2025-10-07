@@ -1,0 +1,23 @@
+# Gerador de dados RiotBench (Kafka)
+FROM python:3.11-slim
+
+# Variáveis de ambiente básicas
+ENV PYTHONUNBUFFERED=1 \
+    RIOTBENCH_HOME=/opt/riotbench \
+    KAFKA_BROKER=kafka:9092 \
+    TOPIC=riotbench-stream
+
+# Instala dependências
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git wget openjdk-21-jre-headless \
+    && pip install --no-cache-dir kafka-python pandas numpy \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copia o RiotBench para dentro da imagem
+COPY Riot-Bench /opt/riotbench
+COPY start-riotbench.sh /usr/local/bin/start-riotbench.sh
+RUN chmod +x /usr/local/bin/start-riotbench.sh
+
+WORKDIR ${RIOTBENCH_HOME}
+
+CMD ["bash", "/usr/local/bin/start-riotbench.sh"]

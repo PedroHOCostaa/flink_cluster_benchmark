@@ -12,6 +12,6 @@ kafka-console-producer --bootstrap-server localhost:9092 --topic test_topic
 ```
 ### Consumir em um tópico
 ```bash
-kafka-console-producer --topic test_topic --bootstrap-server localhost:9092
+kafka-console-consumer --topic test_topic --bootstrap-server localhost:9092
 ```
 

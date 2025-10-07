@@ -45,6 +45,17 @@ services:
     tmpfs:
       - /var/lib/kafka/data
 
+  riotbench:
+    image: riotbench
+    networks:
+      - kafka_network
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - TOPIC=riotbench-stream
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
 networks:
   kafka_network:
     external: true

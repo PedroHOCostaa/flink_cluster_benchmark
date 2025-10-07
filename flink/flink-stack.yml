@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   jobmanager:
-    image: flink-with-kafka-python:2.0
+    image: flink-with-kafka:2.0
     command: jobmanager
     ports:
       - "8081:8081"
@@ -16,7 +16,7 @@ services:
         constraints: [node.role == manager]
 
   taskmanager:
-    image: flink-with-kafka-python:2.0
+    image: flink-with-kafka:2.0
     command: taskmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager

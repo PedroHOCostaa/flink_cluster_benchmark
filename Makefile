@@ -1,11 +1,11 @@
 # Construir as imagens dos containers
 build:
-	docker build docker build -t flink-with-kafka:2.0 .
-
+	docker build -t flink-with-kafka:2.0 ./flink/
+	docker build -t riotbench ./kafka_riotbench/
 # Iniciar o ambiente de desenvolvimento
 on:
-	docker stack deploy -c ./stacks/flink-stack.yml flink
-	docker stack deploy -c ./stacks/kafka-stack.yml kafka
+	docker stack deploy -c ./flink/flink-stack.yml flink
+	docker stack deploy -c ./kafka_riotbench/kafka-stack.yml kafka
 
 # Restaurar o ambiente (apaga tudo e reconstrói)
 off:
@@ -28,3 +28,6 @@ kill:
 	docker stack rm flink
 	docker stack rm kafka
 	docker swarm leave --force
+
+network_start:
+	docker network create -d overlay kafka_network
