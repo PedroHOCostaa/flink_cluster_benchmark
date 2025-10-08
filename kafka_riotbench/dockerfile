@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copia o RiotBench para dentro da imagem
-COPY Riot-Bench /opt/riotbench
+COPY riot-bench /opt/riotbench
 COPY start-riotbench.sh /usr/local/bin/start-riotbench.sh
 RUN chmod +x /usr/local/bin/start-riotbench.sh
 
