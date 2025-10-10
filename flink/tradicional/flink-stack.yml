@@ -2,30 +2,25 @@ version: "3.8"
 
 services:
   jobmanager:
-    image: flink-with-kafka:2.0
+    image: flink-with-kafka-trad:2.0
     command: jobmanager
     ports:
       - "8081:8081"
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
-    networks:
-      - flink_net
-      - kafka_network
     deploy:
       placement:
         constraints: [node.role == manager]
 
   taskmanager:
-    image: flink-with-kafka:2.0
+    image: flink-with-kafka-trad:2.0
     command: taskmanager
+    depends_on:
+      - jobmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
-    networks:
-      - flink_net
-      - kafka_network
     deploy:
-      replicas: 1
-  
+      replicas: 2
 
 networks:
   flink_net:

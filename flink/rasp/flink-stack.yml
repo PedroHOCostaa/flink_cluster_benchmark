@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+
+  jobmanager:
+    image: flink-with-kafka-rasp:2.0
+    command: jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == rasp8
+
+  taskmanager_4gb_node1:
+    image: flink-with-kafka-rasp:2.0
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == rasp41
+
+  taskmanager_4gb_node2:
+    image: flink-with-kafka-rasp:2.0
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == rasp42
+
+  taskmanager_8gb_node:
+    image: flink-with-kafka-rasp:2.0
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == rasp8
+
+networks:
+  flink_net:
+    driver: overlay
+  kafka_network:
+    external: true

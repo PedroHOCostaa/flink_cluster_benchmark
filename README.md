@@ -39,3 +39,9 @@ kafka-console-producer --bootstrap-server localhost:9092 --topic test_topic
 kafka-console-producer --topic test_topic --bootstrap-server localhost:9092
 ```
 
+## Código relacionados ao registry
+### Enviar o Dockerfile que está em ./app1/ para o registry que está no local host na porta 5000 
+```bash
+docker build -t localhost:5000/meu-app1:1.0 ./app1
+docker push localhost:5000/meu-app1:1.0
+```

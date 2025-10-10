@@ -1,10 +1,22 @@
 # Construir as imagens dos containers
 build:
-	docker build -t flink-with-kafka:2.0 ./flink/
-	docker build -t riotbench ./kafka_riotbench/
+	docker build -t flink-with-kafka-local:2.0 ./flink/local/
+	docker build -t flink-with-kafka-rasp:2.0 ./flink/rasp/
+	docker build -t flink-with-kafka-trad:2.0 ./flink/tradicional/
+
 # Iniciar o ambiente de desenvolvimento
-on:
-	docker stack deploy -c ./flink/flink-stack.yml flink
+on_local:
+	docker stack deploy -c ./flink/local/flink-stack.yml flink
+	docker stack deploy -c ./kafka_riotbench/kafka-stack.yml kafka
+
+# Iniciar o ambiente de desenvolvimento
+on_rasp:
+	docker stack deploy -c ./flink/rasp/flink-stack.yml flink
+	docker stack deploy -c ./kafka_riotbench/kafka-stack.yml kafka
+
+# Iniciar o ambiente de desenvolvimento
+on_trad:
+	docker stack deploy -c ./flink/tradicional/flink-stack.yml flink
 	docker stack deploy -c ./kafka_riotbench/kafka-stack.yml kafka
 
 # Restaurar o ambiente (apaga tudo e reconstrói)
@@ -18,7 +30,7 @@ swarm_start:
 	docker network create --driver overlay kafka_network
 
 swarm_leave:
-	docker leave --force
+	docker swarm leave --force
 
 # Criar e aplicar migrações
 copy_jobs:
