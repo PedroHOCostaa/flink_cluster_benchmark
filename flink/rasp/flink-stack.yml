@@ -9,6 +9,9 @@ services:
       - "8081:8081"
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    networks:
+      - flink_net
+      - kafka_network
     deploy:
       placement:
         constraints:
@@ -19,6 +22,9 @@ services:
     command: taskmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    networks:
+      - flink_net
+      - kafka_network
     deploy:
       placement:
         constraints:
@@ -29,6 +35,9 @@ services:
     command: taskmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    networks:
+      - flink_net
+      - kafka_network
     deploy:
       placement:
         constraints:
@@ -39,6 +48,9 @@ services:
     command: taskmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    networks:
+      - flink_net
+      - kafka_network
     deploy:
       placement:
         constraints:

@@ -1,8 +1,25 @@
-# Construir as imagens dos containers
+DOCKER_USER = pedrohocostaa
+REPO_NAME = iot-stream-flink-benchmark
+
+FLINK_LOCAL = ./flink/local/
+FLINK_RASP = ./flink/rasp/
+FLINK_TRAD = ./flink/tradicional/
+
 build:
-	docker build -t flink-with-kafka-local:2.0 ./flink/local/
-	docker build -t flink-with-kafka-rasp:2.0 ./flink/rasp/
-	docker build -t flink-with-kafka-trad:2.0 ./flink/tradicional/
+	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):local $(FLINK_LOCAL)
+	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):rasp $(FLINK_RASP)
+	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):trad $(FLINK_TRAD)
+
+push:
+	docker push $(DOCKER_USER)/$(REPO_NAME):local
+	docker push $(DOCKER_USER)/$(REPO_NAME):rasp
+	docker push $(DOCKER_USER)/$(REPO_NAME):trad
+
+clean:
+	docker rmi $(DOCKER_USER)/$(REPO_NAME):local || true
+	docker rmi $(DOCKER_USER)/$(REPO_NAME):rasp || true
+	docker rmi $(DOCKER_USER)/$(REPO_NAME):trad || true
+
 
 # Iniciar o ambiente de desenvolvimento
 on_local:
