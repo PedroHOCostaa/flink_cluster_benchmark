@@ -6,26 +6,28 @@ FLINK_RASP = ./flink/rasp/
 FLINK_TRAD = ./flink/tradicional/
 
 build_all:
-	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):local $(FLINK_LOCAL)
+	docker build --no-cache -t iot-stream-flink-benchmark_local $(FLINK_LOCAL)
 	docker buildx build --platform linux/arm64 -t $(DOCKER_USER)/$(REPO_NAME):rasp --load $(FLINK_RASP)
 	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):trad $(FLINK_TRAD)
 build_local:
-	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):local $(FLINK_LOCAL)
+	docker build -t iot-stream-flink-benchmark_local $(FLINK_LOCAL)
 build_rasp:
 	docker buildx build --platform linux/arm64 -t $(DOCKER_USER)/$(REPO_NAME):rasp --load $(FLINK_RASP)
 build_trad:
 	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):trad $(FLINK_TRAD)
 
 push_all:
-	docker push $(DOCKER_USER)/$(REPO_NAME):local
 	docker push $(DOCKER_USER)/$(REPO_NAME):rasp
 	docker push $(DOCKER_USER)/$(REPO_NAME):trad
-push_local:
-	docker push $(DOCKER_USER)/$(REPO_NAME):local
 push_rasp:
 	docker push $(DOCKER_USER)/$(REPO_NAME):rasp
 push_trad:
 	docker push $(DOCKER_USER)/$(REPO_NAME):trad
+
+build_e_push_rasp:
+	docker buildx build --platform linux/arm64 -t $(DOCKER_USER)/$(REPO_NAME):rasp --load $(FLINK_RASP)
+	docker push $(DOCKER_USER)/$(REPO_NAME):rasp
+
 
 clean:
 	docker rmi $(DOCKER_USER)/$(REPO_NAME):local || true
