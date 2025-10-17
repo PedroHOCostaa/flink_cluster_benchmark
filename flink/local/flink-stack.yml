@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   jobmanager:
-    image: flink-with-kafka-local:2.0
+    image: pedrohocostaa/iot-stream-flink-benchmark:local
     command: jobmanager
     ports:
       - "8081:8081"
@@ -16,7 +16,7 @@ services:
         constraints: [node.role == manager]
 
   taskmanager:
-    image: flink-with-kafka-local:2.0
+    image: pedrohocostaa/iot-stream-flink-benchmark:local
     command: taskmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
@@ -30,7 +30,6 @@ services:
   
 
 networks:
-  flink_net:
-    driver: overlay
+  flink_net: {}
   kafka_network:
     external: true
