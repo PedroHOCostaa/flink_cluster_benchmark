@@ -7,7 +7,14 @@ FLINK_TRAD = ./flink/tradicional/
 
 build:
 	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):local $(FLINK_LOCAL)
-	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):rasp $(FLINK_RASP)
+	docker buildx build --platform linux/arm64 -t $(DOCKER_USER)/$(REPO_NAME):rasp --load $(FLINK_RASP)
+	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):trad $(FLINK_TRAD)
+
+build_local:
+	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):local $(FLINK_LOCAL)
+build_rasp:
+	docker buildx build --platform linux/arm64 -t $(DOCKER_USER)/$(REPO_NAME):rasp --load $(FLINK_RASP)
+build_trad:
 	docker build --no-cache -t $(DOCKER_USER)/$(REPO_NAME):trad $(FLINK_TRAD)
 
 push:
