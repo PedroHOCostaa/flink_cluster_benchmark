@@ -5,6 +5,22 @@ FLINK_LOCAL = ./flink/local/
 FLINK_RASP = ./flink/rasp/
 FLINK_TRAD = ./flink/tradicional/
 
+JOB_PROJECT_DIR = ./flink/jobs/maven/meu-job-flink
+# Nome do JAR final (do seu pom.xml <artifactId> e <version>)
+JOB_JAR_NAME = meu-job-flink-0.1.jar
+# Caminho completo para o JAR construído
+JOB_JAR_PATH = $(JOB_PROJECT_DIR)/target/$(JOB_JAR_NAME)
+
+# NOVO TARGET: Constrói o seu Job Flink executando 'mvn clean package'
+build_job:
+	@echo "============================================================"
+	@echo "Construindo o Job Flink JAR em $(JOB_PROJECT_DIR)..."
+	@echo "============================================================"
+	cd $(JOB_PROJECT_DIR) && mvn clean package
+	@echo "============================================================"
+	@echo "Job FLink JAR construído com sucesso em: $(JOB_JAR_PATH)"
+	@echo "============================================================"
+
 build_all:
 	docker build --no-cache -t iot-stream-flink-benchmark_local $(FLINK_LOCAL)
 	docker buildx build --platform linux/arm64 -t $(DOCKER_USER)/$(REPO_NAME):rasp --load $(FLINK_RASP)
@@ -56,9 +72,6 @@ swarm_start:
 
 swarm_leave:
 	docker swarm leave --force
-
-copy_jobs:
-	docker cp ./flink/jobs $(docker ps -qf "name=flink_jobmanager"):/opt/flink/jobs/
 
 kill:
 	docker stack rm flink

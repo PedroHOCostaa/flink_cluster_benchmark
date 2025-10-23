@@ -1,0 +1,8 @@
+com/meutrabalho/proto/SensorProtos.class
+com/meutrabalho/proto/SensorProtos$SensorLeitura$1.class
+com/meutrabalho/MeuJobFlink.class
+com/meutrabalho/proto/SensorProtos$SensorLeituraOrBuilder.class
+com/meutrabalho/proto/SensorProtos$SensorLeitura.class
+com/meutrabalho/proto/SensorProtos$SensorLeitura$Builder.class
+com/meutrabalho/MeuJobFlink$ByteArraySerializer.class
+com/meutrabalho/MeuJobFlink$ByteArrayDeserializer.class
