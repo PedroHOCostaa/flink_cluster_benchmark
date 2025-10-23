@@ -1,15 +1,11 @@
-# Baseado na imagem oficial do Flink (x86_64)
-FROM flink:latest
+FROM flink:1.20.3-scala_2.12-java17
 
-# Instala Python e dependências do PyFlink
-USER root
-RUN apt-get update && apt-get install -y python3 python3-pip && \
-    pip3 install apache-flink && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Conector kafka para o flink
+ADD --chown=flink:flink https://repo.maven.apache.org/maven2/org/apache/flink/flink-connector-kafka/3.4.0-1.20/flink-connector-kafka-3.4.0-1.20.jar /opt/flink/lib/
+# Flink protobuff 
+ADD --chown=flink:flink https://repo.maven.apache.org/maven2/org/apache/flink/flink-protobuf/1.20.3/flink-protobuf-1.20.3.jar /opt/flink/lib/
+# Java protobuff
+ADD --chown=flink:flink https://repo.maven.apache.org/maven2/com/google/protobuf/protobuf-java/3.25.3/protobuf-java-3.25.3.jar /opt/flink/lib/
 
-# Define as variáveis de ambiente para PyFlink
-USER flink
-ENV PYFLINK_PYTHON=/usr/bin/python3
-ENV PYFLINK_CLIENT_EXECUTABLE=/usr/bin/python3
-ADD https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/4.0.1-2.0/flink-sql-connector-kafka-4.0.1-2.0.jar /opt/flink/lib/
-ADD https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka/4.0.1-2.0/flink-connector-kafka-4.0.1-2.0.jar /opt/flink/lib/
+# Como você notou, não precisamos dos conectores SQL ou JSON.
+# A imagem base já cuida do resto.
