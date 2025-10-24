@@ -6,20 +6,15 @@ FLINK_RASP = ./flink/rasp/
 FLINK_TRAD = ./flink/tradicional/
 
 JOB_PROJECT_DIR = ./flink/jobs/maven/meu-job-flink
-# Nome do JAR final (do seu pom.xml <artifactId> e <version>)
-JOB_JAR_NAME = meu-job-flink-0.1.jar
-# Caminho completo para o JAR construído
-JOB_JAR_PATH = $(JOB_PROJECT_DIR)/target/$(JOB_JAR_NAME)
+CONSUMIDOR_DIR = ./kafka_riotbench/maven/meu-cliente-teste
 
 # NOVO TARGET: Constrói o seu Job Flink executando 'mvn clean package'
 build_job:
-	@echo "============================================================"
-	@echo "Construindo o Job Flink JAR em $(JOB_PROJECT_DIR)..."
-	@echo "============================================================"
 	cd $(JOB_PROJECT_DIR) && mvn clean package
-	@echo "============================================================"
-	@echo "Job FLink JAR construído com sucesso em: $(JOB_JAR_PATH)"
-	@echo "============================================================"
+
+build_consumidor:
+	cd $(CONSUMIDOR_DIR) && mvn clean package -Dmaven.test.skip=true
+
 
 build_all:
 	docker build --no-cache -t iot-stream-flink-benchmark_local $(FLINK_LOCAL)

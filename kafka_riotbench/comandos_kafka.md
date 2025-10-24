@@ -15,3 +15,13 @@ kafka-console-producer --bootstrap-server localhost:9092 --topic test_topic
 kafka-console-consumer --topic test_topic --bootstrap-server localhost:9092
 ```
 
+### Tópico de entrada
+```bash
+kafka-topics --create --topic topico-entrada --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+```
+
+### Tópico de saída
+```bash
+kafka-topics --create --topic topico-saida --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+```
+

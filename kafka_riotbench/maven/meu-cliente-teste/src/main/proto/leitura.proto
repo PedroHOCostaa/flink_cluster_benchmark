@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+// Este pacote deve bater com o que você definiu no pom.xml
+option java_package = "com.meutrabalho.proto";
+option java_outer_classname = "SensorProtos";
+
+message SensorLeitura {
+  string id_sensor = 1;
+  double valor = 2;
+}

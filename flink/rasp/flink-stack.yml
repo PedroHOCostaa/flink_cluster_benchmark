@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   jobmanager:
-    image: flink:1.20.3-scala_2.12-java17
+    image: pedrohocostaa/iot-stream-flink-benchmark:rasp
     command: jobmanager
     ports:
       - "8081:8081"
@@ -18,7 +18,7 @@ services:
           - node.hostname == rasp8
 
   taskmanager_4gb_node1:
-    image: flink:1.20.3-scala_2.12-java17
+    image: pedrohocostaa/iot-stream-flink-benchmark:rasp
     command: taskmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
@@ -31,7 +31,7 @@ services:
           - node.hostname == rasp41
 
   taskmanager_4gb_node2:
-    image: flink:1.20.3-scala_2.12-java17
+    image: pedrohocostaa/iot-stream-flink-benchmark:rasp
     command: taskmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
@@ -44,7 +44,7 @@ services:
           - node.hostname == rasp42
 
   taskmanager_8gb_node:
-    image: flink:1.20.3-scala_2.12-java17
+    image: pedrohocostaa/iot-stream-flink-benchmark:rasp
     command: taskmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager

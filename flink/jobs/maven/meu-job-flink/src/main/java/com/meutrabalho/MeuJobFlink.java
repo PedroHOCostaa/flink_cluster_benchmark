@@ -25,7 +25,7 @@ import com.meutrabalho.proto.SensorProtos.SensorLeitura;
  */
 public class MeuJobFlink {
 
-    private static final String KAFKA_BROKERS = "kafka:9092"; // Endereço do seu Kafka no Docker
+    private static final String KAFKA_BROKERS = "172.16.16.3:29092"; // Endereço do seu Kafka no Docker
     private static final String TOPICO_ENTRADA = "topico-entrada";
     private static final String TOPICO_SAIDA = "topico-saida";
     private static final String CONSUMER_GROUP_ID = "meu-job-flink-group";

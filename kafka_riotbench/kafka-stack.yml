@@ -9,7 +9,7 @@ services:
     ports:
       - "29092:29092"
     environment:
-      # Identificação do cluster (pode ser qualquer valor de 22 caracteres)
+      # Identificação do cluster
       CLUSTER_ID: "abcdefghijklmnopqrstuv"
 
       # Configuração KRaft (sem ZooKeeper)
@@ -19,22 +19,25 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
 
       # Listeners internos e externos
+      # (O que o Kafka "ouve")
       KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:29092"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092"
+      
+      # (O que o Kafka "anuncia" para o mundo)
+      # REMOVEMOS o CONTROLLER:// daqui
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://172.16.16.3:29092"
 
-      # ⚙️ Mapa de protocolos — ESSENCIAL
+      # ⚙️ Mapa de protocolos
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
+
 
       # Configurações básicas
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-
-      # Diretório de logs (em tmpfs)
       KAFKA_LOG_DIRS: /var/lib/kafka/data
 
-      # Logging mais limpo
+      # Logging
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
 
