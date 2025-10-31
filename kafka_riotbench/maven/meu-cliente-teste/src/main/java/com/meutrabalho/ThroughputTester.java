@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ThroughputTester {
 
-    private static final String KAFKA_BROKERS = "172.16.16.3:29092"; // IMPORTANTE: Mude para "localhost:9092" se for rodar este JAR fora do Docker
+    private static final String KAFKA_BROKERS = "172.16.16.3:9092"; // IMPORTANTE: Mude para "localhost:9092" se for rodar este JAR fora do Docker
     private static final String TOPICO_ENTRADA = "topico-entrada";
     private static final String TOPICO_SAIDA = "topico-saida";
 

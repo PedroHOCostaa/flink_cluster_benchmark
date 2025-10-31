@@ -7,7 +7,7 @@ services:
     networks:
       - kafka_network
     ports:
-      - "29092:29092"
+      - "9092:9092"
     environment:
       # Identificação do cluster
       CLUSTER_ID: "abcdefghijklmnopqrstuv"
@@ -24,7 +24,7 @@ services:
       
       # (O que o Kafka "anuncia" para o mundo)
       # REMOVEMOS o CONTROLLER:// daqui
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://172.16.16.3:29092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://172.16.16.3:9092"
 
       # ⚙️ Mapa de protocolos
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
