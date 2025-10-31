@@ -42,8 +42,5 @@ kafka-console-producer --topic test_topic --bootstrap-server localhost:9092
 ### Criar tópicos de produção consumo
 ```bash
 kafka-topics --create --topic topico-entrada --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
-```
-
-```bash
 kafka-topics --create --topic topico-saida --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 ```
