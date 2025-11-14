@@ -7,7 +7,7 @@ services:
     networks:
       - kafka_network
     ports:
-      - "9092:9092"
+      - "9092:9092" # Isso está correto (Host 9092 -> Container 9092)
     environment:
       # Identificação do cluster
       CLUSTER_ID: "abcdefghijklmnopqrstuv"
@@ -18,17 +18,20 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
 
-      # Listeners internos e externos
-      # (O que o Kafka "ouve")
-      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:29092"
+      # Listeners (O que o Kafka "ouve")
+      # Vamos usar um listener "ALL" para simplificar
+      KAFKA_LISTENERS: "ALL://:9092,CONTROLLER://:9093" # <-- MUDANÇA 1
+
+      # Advertised Listeners (O que o Kafka "anuncia" para o mundo)
+      # Esta é a correção principal:
+      # Anuncie o IP do HOST para TODOS os clientes.
+      KAFKA_ADVERTISED_LISTENERS: "ALL://172.16.16.3:9092" # <-- MUDANÇA 2
+
+      # Mapa de protocolos
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "ALL:PLAINTEXT,CONTROLLER:PLAINTEXT" # <-- MUDANÇA 3
       
-      # (O que o Kafka "anuncia" para o mundo)
-      # REMOVEMOS o CONTROLLER:// daqui
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://172.16.16.3:9092"
-
-      # ⚙️ Mapa de protocolos
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
-
+      # Diz ao broker para usar este listener para se comunicar (mesmo internamente)
+      KAFKA_INTER_BROKER_LISTENER_NAME: ALL # <-- MUDANÇA 4
 
       # Configurações básicas
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1

@@ -21,6 +21,9 @@ services:
     image: pedrohocostaa/iot-stream-flink-benchmark:rasp
     command: taskmanager
     environment:
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net
@@ -34,6 +37,9 @@ services:
     image: pedrohocostaa/iot-stream-flink-benchmark:rasp
     command: taskmanager
     environment:
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net
@@ -47,6 +53,9 @@ services:
     image: pedrohocostaa/iot-stream-flink-benchmark:rasp
     command: taskmanager
     environment:
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net

@@ -134,9 +134,10 @@ public class ThroughputTester {
 
                 // Criamos um ID de sensor único (ex: "raw_weather_data_aarhus-temp")
                 // O Flink vai agrupar (keyBy) por este ID.
-                String sensorId = dir.getName() + "-" + measurementType;
 
                 if (dataFile.exists()) {
+
+                    int sensorIdCounter = 0;
                     try (BufferedReader br = new BufferedReader(new FileReader(dataFile))) {
                         String line;
                         // Cada linha é um JSON Object
@@ -156,6 +157,8 @@ public class ThroughputTester {
                                     long timestamp = LocalDateTime.parse(timestampKey, ISO_DATE_TIME)
                                                                   .toInstant(ZoneOffset.UTC).toEpochMilli();
                                     double value = Double.parseDouble(valueStr);
+
+                                    String sensorId = measurementType + "_" + (sensorIdCounter++ % 100);
 
                                     // Cria o objeto Protobuf
                                     SensorLeitura leitura = SensorLeitura.newBuilder()
