@@ -19,6 +19,7 @@
     </properties>
 
     <dependencies>
+        <!-- Suas dependências originais -->
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
@@ -36,6 +37,28 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.36</version>
         </dependency>
+
+        <!-- 
+        ### DEPENDÊNCIAS ADICIONADAS ###
+        -->
+
+        <!-- 1. Para o RateLimiter (pacing/ritmo preciso) -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.0.0-jre</version>
+        </dependency>
+
+        <!-- 2. Para ler o formato JSON dos dados do RIOTBench -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
+
+        <!-- 
+        ### FIM DAS DEPENDÊNCIAS ADICIONADAS ###
+        -->
     </dependencies>
 
     <build>
@@ -48,6 +71,7 @@
         </extensions>
 
         <plugins>
+            <!-- Seu plugin original do Protobuf -->
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
@@ -67,6 +91,7 @@
                 </executions>
             </plugin>
             
+            <!-- Seu plugin original do Shade -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

@@ -1,10 +1,18 @@
 syntax = "proto3";
 
-// Este pacote deve bater com o que você definiu no pom.xml
-option java_package = "com.meutrabalho.proto";
+package com.meutrabalho.proto;
+
+// Define o nome da classe Java externa que conterá todas as mensagens
 option java_outer_classname = "SensorProtos";
 
+// A mensagem que representa uma única leitura do dataset
 message SensorLeitura {
-  string id_sensor = 1;
-  double valor = 2;
+  string sensor_id = 1;       // ID do sensor (ex: "s_1", "temp_23")
+  int64 timestamp = 2;        // Timestamp da leitura (em milissegundos)
+  string measurement_type = 3; // Tipo (ex: "temp", "humidity", "pressure")
+  double value = 4;           // O valor da medição
+  
+  // Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+  string latitude = 5;
+  string longitude = 6;
 }

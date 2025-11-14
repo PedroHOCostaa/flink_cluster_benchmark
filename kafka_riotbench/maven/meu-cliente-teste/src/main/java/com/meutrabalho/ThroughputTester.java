@@ -1,6 +1,9 @@
 package com.meutrabalho;
 
+// Import do Protobuf (gerado pelo Maven)
 import com.meutrabalho.proto.SensorProtos.SensorLeitura;
+
+// Imports do Kafka
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -8,62 +11,183 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+// Imports do Java
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
+import java.util.Iterator; // Para ler o JSON
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
+// Import do RateLimiter (pela dependência "guava")
+import com.google.common.util.concurrent.RateLimiter;
+
+// Import do leitor de JSON (pela dependência "org.json")
+import org.json.JSONObject; 
+
 /**
- * Este programa inicia 4 threads para um teste de saturação automático:
- * 1. Consumer: Entra no grupo do Kafka e sinaliza quando está pronto.
- * 2. LoadController: Aumenta a "taxa alvo" (msgs/seg) a cada 20 segundos.
- * 3. Producer: Envia mensagens na "taxa alvo" definida pelo LoadController.
- * 4. Monitor: Imprime a "taxa alvo" (Entrada) vs. a "taxa real" (Saída).
+ * Controlador de Carga ("Stress Tester") - Versão Final
+ * 1. (Warm-Up) Carrega os dados reais do RIOTBench (Aarhus)
+ * lendo o formato JSON (key: timestamp, value: medição)
+ * 2. Usa RateLimiter (Guava) para um pacing preciso.
+ * 3. Produtor envia dados reais do Warm-Up para 'topico-entrada'.
+ * 4. Consumidor (Monitor) lê 'topico-saida-agregado' (Strings) e calcula o throughput.
  */
 public class ThroughputTester {
 
     // --- Configuração do Kafka ---
-    private static final String KAFKA_BROKERS = "172.16.16.3:9092"; // Seu IP e porta
+    private static final String KAFKA_BROKERS = "172.16.16.3:9092";
     private static final String TOPICO_ENTRADA = "topico-entrada";
-    private static final String TOPICO_SAIDA = "topico-saida";
+    // O Flink vai escrever neste tópico, e o nosso consumidor vai ler dele
+    private static final String TOPICO_SAIDA = "topico-saida-agregado"; 
+
+    // --- Configuração dos Dados ---
+    // !!! CONFIRME SE ESTE CAMINHO ESTÁ CORRETO !!!
+    private static final String DATA_BASE_PATH = "/home/pedro/Documentos/data_base";
 
     // --- Variáveis de Sincronização e Estado ---
     private static final AtomicLong receivedMessageCount = new AtomicLong(0);
     private static final CountDownLatch consumerReadySignal = new CountDownLatch(1);
-    
-    // Variável que o LoadController define e o Producer lê
     private static final AtomicLong targetThroughputPerSec = new AtomicLong(0);
 
+    // Lista de Warm-Up: Guarda os bytes[] do Protobuf
+    private static final List<byte[]> WARM_UP_DATA = new ArrayList<>();
 
-    public static void main(String[] args) {
+    // RateLimiter para controlar a produção
+    @SuppressWarnings("UnstableApiUsage")
+    private static final RateLimiter rateLimiter = RateLimiter.create(1.0); // 1/s por padrão
+
+    // Mapeia nomes de arquivo para o "measurement_type" do Protobuf
+    private static final Map<String, String> FILE_TO_TYPE_MAP = Map.of(
+            "tempm.txt", "temp",
+            "hum.txt", "humidity",
+            "pressurem.txt", "pressure",
+            "dewptm.txt", "dewpoint",
+            "vism.txt", "visibility",
+            "wdird.txt", "wind_direction",
+            "wspdm.txt", "wind_speed"
+    );
+
+    // Formato do Timestamp no JSON (ex: "2014-02-13T06:20:00")
+    private static final DateTimeFormatter ISO_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+    public static void main(String[] args) throws Exception {
         System.out.println("Iniciando Teste de Saturação (Stress Test)...");
+
+        // --- PASSO 1: WARM-UP ---
+        System.out.println("Fase 1: Warm-Up (Lendo dados reais do disco)...");
+        doWarmUp(DATA_BASE_PATH);
+        if (WARM_UP_DATA.isEmpty()) {
+            System.err.println("### ERRO: Nenhum dado carregado no Warm-Up. Verifique o DATA_BASE_PATH: " + DATA_BASE_PATH);
+            return;
+        }
+        System.out.println("Warm-Up completo. " + WARM_UP_DATA.size() + " registros carregados na memória.");
+        
+        System.out.println("Fase 2: Iniciando threads...");
         System.out.println("Kafka Broker: " + KAFKA_BROKERS);
         System.out.println("Escrevendo em: " + TOPICO_ENTRADA);
         System.out.println("Lendo de: " + TOPICO_SAIDA);
 
-        // 1. Inicia o Consumidor (que vai travar e esperar pela partição)
+        // Inicia as 4 threads
         new Thread(ThroughputTester::runConsumer).start();
-        
-        // 2. Inicia o Produtor (que vai travar esperando o sinal do Consumidor)
         new Thread(ThroughputTester::runProducer).start();
-        
-        // 3. Inicia o Monitor (que também vai travar esperando o sinal)
         new Thread(ThroughputTester::runMonitor).start();
-
-        // 4. Inicia o Controlador de Carga (que também espera o sinal)
         new Thread(ThroughputTester::runLoadController).start();
     }
 
     /**
+     * NOVO: Método de Warm-Up (CORRIGIDO)
+     * Lê o formato JSON (key-value) e o transforma em registros Protobuf.
+     */
+    private static void doWarmUp(String basePath) {
+        File baseDir = new File(basePath);
+        File[] subDirs = baseDir.listFiles(File::isDirectory); // Pega 'raw_weather_data_aarhus', etc.
+
+        if (subDirs == null) {
+            System.err.println("ERRO: O diretório base não contém subdiretórios: " + basePath);
+            return;
+        }
+
+        for (File dir : subDirs) {
+            if (dir.getName().equals("__MACOSX")) continue; // Ignora
+            
+            System.out.println("Processando diretório: " + dir.getName());
+            
+            for (Map.Entry<String, String> entry : FILE_TO_TYPE_MAP.entrySet()) {
+                String fileName = entry.getKey();
+                String measurementType = entry.getValue(); // ex: "temp"
+                File dataFile = new File(dir, fileName);
+
+                // Criamos um ID de sensor único (ex: "raw_weather_data_aarhus-temp")
+                // O Flink vai agrupar (keyBy) por este ID.
+                String sensorId = dir.getName() + "-" + measurementType;
+
+                if (dataFile.exists()) {
+                    try (BufferedReader br = new BufferedReader(new FileReader(dataFile))) {
+                        String line;
+                        // Cada linha é um JSON Object
+                        while ((line = br.readLine()) != null) {
+                            if (line.trim().isEmpty()) continue;
+                            
+                            JSONObject jsonLine = new JSONObject(line);
+                            
+                            // Itera sobre todas as chaves (timestamps) desse objeto
+                            Iterator<String> keys = jsonLine.keys();
+                            while(keys.hasNext()) {
+                                String timestampKey = keys.next(); // ex: "2014-02-13T06:20:00"
+                                String valueStr = jsonLine.getString(timestampKey); // ex: "3.0"
+
+                                try {
+                                    // Converte os dados
+                                    long timestamp = LocalDateTime.parse(timestampKey, ISO_DATE_TIME)
+                                                                  .toInstant(ZoneOffset.UTC).toEpochMilli();
+                                    double value = Double.parseDouble(valueStr);
+
+                                    // Cria o objeto Protobuf
+                                    SensorLeitura leitura = SensorLeitura.newBuilder()
+                                            .setSensorId(sensorId)
+                                            .setTimestamp(timestamp)
+                                            .setMeasurementType(measurementType)
+                                            .setValue(value)
+                                            // Como falamos, não temos lat/long, então não os definimos.
+                                            .build();
+
+                                    // Serializa e adiciona à lista
+                                    WARM_UP_DATA.add(leitura.toByteArray());
+
+                                } catch (Exception e) {
+                                    // Ignora timestamps mal formados ou valores não-numéricos
+                                    // System.err.println("Ignorando registro mal formado: " + timestampKey + ":" + valueStr);
+                                }
+                            }
+                        }
+                    } catch (IOException e) {
+                        System.err.println("Erro ao ler o arquivo " + dataFile.getAbsolutePath() + ": " + e.getMessage());
+                    } catch (org.json.JSONException e) {
+                        System.err.println("Erro ao parsear JSON no arquivo " + dataFile.getAbsolutePath() + ": " + e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Thread 1: CONTROLADOR DE CARGA
-     * Aumenta a carga (taxa de entrada) em etapas.
+     * (Seu código original, mas controla o RateLimiter)
      */
     public static void runLoadController() {
         // --- Configurações do Teste ---
@@ -73,17 +197,19 @@ public class ThroughputTester {
         // ---------------------------------
 
         try {
-            // Espera o Consumidor estar pronto
-            consumerReadySignal.await();
+            consumerReadySignal.await(); // Espera o Consumidor estar pronto
             System.err.println("Load Controller iniciado.");
-            
             long currentTarget = STARTING_RATE;
 
             while (true) {
-                // Define a nova taxa alvo
                 targetThroughputPerSec.set(currentTarget);
                 
-                System.err.printf("%n--- TESTE: Definindo taxa de ENTRADA para %d msgs/seg por %d segundos ---%n%n",
+                // Define a taxa no RateLimiter
+                @SuppressWarnings("UnstableApiUsage")
+                double newRate = (double) currentTarget;
+                rateLimiter.setRate(newRate);
+
+                System.err.printf("%n--- TESTE: Definindo taxa de ENTRADA para %,d msgs/seg por %d segundos ---%n%n",
                                   currentTarget, SECONDS_PER_STEP);
                 
                 // Dorme pelo tempo da etapa
@@ -97,75 +223,41 @@ public class ThroughputTester {
         }
     }
 
-
     /**
      * Thread 2: PRODUTOR
-     * Gera e envia mensagens na taxa definida por 'targetThroughputPerSec'.
+     * (Usa RateLimiter e os dados do WARM_UP)
      */
-    public static void runProducer() {
+     public static void runProducer() {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKERS);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
 
-        KafkaProducer<String, byte[]> producer = new KafkaProducer<>(props);
-        Random random = new Random();
-        long count = 0;
+        // Otimizações de Produtor para Alto Throughput
+        props.put(ProducerConfig.ACKS_CONFIG, "1"); // "0" p/ max performance, "1" p/ equilíbrio
+        props.put(ProducerConfig.LINGER_MS_CONFIG, "20"); // Agrupa msgs por 20ms
+        props.put(ProducerConfig.BATCH_SIZE_CONFIG, "65536"); // Lotes de 64KB
+        props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy"); // Compressão rápida
 
-        // --- Configuração do Lote do Produtor ---
-        final int MESSAGES_PER_BATCH = 100; // Enviar em lotes de 100
-        // ---------------------------------------
+        KafkaProducer<String, byte[]> producer = new KafkaProducer<>(props);
+        long count = 0;
 
         try {
             consumerReadySignal.await(); // Espera o Consumidor
-            System.out.println("Producer iniciado...");
+            System.out.println("Producer iniciado... (usando dados reais e RateLimiter)");
 
             while (true) {
-                long currentTargetRate = targetThroughputPerSec.get();
-                if (currentTargetRate <= 0) {
-                    Thread.sleep(1000); // Espera o LoadController definir uma taxa
-                    continue;
-                }
-
-                // --- Lógica de Pacing (Controle de Ritmo) ---
+                // Pega o próximo dado da lista em loop
+                byte[] payload = WARM_UP_DATA.get((int) (count % WARM_UP_DATA.size()));
                 
-                // 1. Quantos lotes precisamos enviar por segundo?
-                // Ex: (10.000 msgs/seg) / (100 msgs/lote) = 100 lotes/segundo
-                double batchesPerSecond = (double) currentTargetRate / MESSAGES_PER_BATCH;
+                // Espera pela permissão do RateLimiter (pacing preciso)
+                @SuppressWarnings("UnstableApiUsage")
+                double timeWaited = rateLimiter.acquire(); 
                 
-                // 2. Quanto tempo (em nanossegundos) CADA lote deve levar (envio + sono)?
-                // Ex: 1.000.000.000 nanos (1 seg) / 100 lotes = 10.000.000 nanos (10ms)
-                long targetBatchTimeNs = (long) (1_000_000_000.0 / batchesPerSecond);
-                
-                long batchStartTime = System.nanoTime();
-
-                // --- Envia um Lote ---
-                for (int i = 0; i < MESSAGES_PER_BATCH; i++) {
-                    String sensorId = "sensor-" + (count % 10);
-                    double valor = random.nextDouble() * 100;
-                    SensorLeitura leitura = SensorLeitura.newBuilder()
-                            .setIdSensor(sensorId)
-                            .setValor(valor)
-                            .build();
-
-                    byte[] payload = leitura.toByteArray();
-                    ProducerRecord<String, byte[]> record = new ProducerRecord<>(TOPICO_ENTRADA, sensorId, payload);
-                    producer.send(record); // Assíncrono
-                    count++;
-                }
-
-                // 3. Lógica de "Sono" Preciso
-                long batchEndTime = System.nanoTime();
-                long batchDurationNs = batchEndTime - batchStartTime;
-                long sleepTimeNs = targetBatchTimeNs - batchDurationNs;
-
-                // Se gastamos menos tempo que o alvo, dormimos a diferença
-                if (sleepTimeNs > 0) {
-                    // Thread.sleep(milissegundos, nanossegundos)
-                    Thread.sleep(sleepTimeNs / 1_000_000, (int) (sleepTimeNs % 1_000_000));
-                }
-                // Se gastamos MAIS tempo (sleepTimeNs < 0), não dormimos
-                // e começamos o próximo lote imediatamente.
+                // Envia o registro
+                ProducerRecord<String, byte[]> record = new ProducerRecord<>(TOPICO_ENTRADA, payload);
+                producer.send(record); // Assíncrono
+                count++;
             }
         } catch (Exception e) {
             System.err.println("Erro no Producer: " + e.getMessage());
@@ -177,35 +269,41 @@ public class ThroughputTester {
 
     /**
      * Thread 3: CONSUMIDOR
-     * Aquece, sinaliza que está pronto, e conta mensagens recebidas.
+     * (Ouve o tópico de SAÍDA e espera STRINGS)
      */
     public static void runConsumer() {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKERS);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "throughput-tester-consumer");
+        
+        // MUDANÇA: O Flink agora envia Strings (ex: "1678886,sensor_1,25.5")
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest"); // Só queremos dados novos
 
-        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+        
+        // Ouve o tópico de SAÍDA (agregado)
         consumer.subscribe(Collections.singletonList(TOPICO_SAIDA));
 
-        System.out.println("Consumer iniciado... entrando no grupo e aguardando partição.");
+        System.out.println("Consumer (Monitor) iniciado... entrando no grupo em " + TOPICO_SAIDA);
 
         try {
             // Loop de "aquecimento": Fica fazendo poll até o Kafka nos dar uma partição
             while (consumer.assignment().isEmpty()) {
-                consumer.poll(Duration.ofMillis(100)); // Isso dispara o "join group"
+                consumer.poll(Duration.ofMillis(100)); // Dispara o "join group"
             }
             
             // SINALIZA que estamos prontos
             consumerReadySignal.countDown();
-            System.out.println("Consumer recebeu partição! O teste vai começar.");
+            System.out.println("Consumer (Monitor) recebeu partição! O teste vai começar.");
 
             // Loop de Leitura Principal
             while (true) {
-                ConsumerRecords<String, byte[]> records = consumer.poll(Duration.ofMillis(100));
-                for (ConsumerRecord<String, byte[]> record : records) {
+                // Lê as STRINGS de resultado
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+                for (ConsumerRecord<String, String> record : records) {
                     receivedMessageCount.incrementAndGet();
                 }
             }
@@ -219,32 +317,28 @@ public class ThroughputTester {
 
     /**
      * Thread 4: MONITOR
-     * Imprime a taxa de ENTRADA (alvo) vs. a taxa de SAÍDA (real).
+     * (Seu código original, está perfeito)
      */
     public static void runMonitor() {
         try {
             consumerReadySignal.await(); // Espera o Consumidor
             System.err.println("Monitor começando a medição...");
-            
             long lastCount = 0;
             long lastTime = System.currentTimeMillis();
 
             while (true) {
                 Thread.sleep(1000); // Imprime a cada 1 segundo
-
                 long now = System.currentTimeMillis();
                 long currentCount = receivedMessageCount.get();
                 long deltaCount = currentCount - lastCount;
                 double deltaTimeSeconds = (now - lastTime) / 1000.0;
-
-                // Taxas
                 long inputRate = targetThroughputPerSec.get();
                 double outputRate = deltaCount / deltaTimeSeconds;
 
                 // Imprime no System.err para separar dos logs INFO
                 System.err.printf(
-                    "Taxa ENTRADA (Alvo): %-7d msgs/s | Taxa SAÍDA (Real): %-10.2f msgs/s | Total Processado: %d%n",
-                    inputRate, outputRate, currentCount);
+                        "Taxa ENTRADA (Alvo): %-10d msgs/s | Taxa SAÍDA (Real): %-12.2f msgs/s | Total Processado: %d%n",
+                        inputRate, outputRate, currentCount);
 
                 lastCount = currentCount;
                 lastTime = now;

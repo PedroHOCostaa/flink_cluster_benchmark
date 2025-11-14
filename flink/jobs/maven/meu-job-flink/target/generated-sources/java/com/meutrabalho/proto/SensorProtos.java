@@ -16,33 +16,111 @@ public final class SensorProtos {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   public interface SensorLeituraOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:SensorLeitura)
+      // @@protoc_insertion_point(interface_extends:com.meutrabalho.proto.SensorLeitura)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string id_sensor = 1;</code>
-     * @return The idSensor.
+     * <pre>
+     * ID do sensor (ex: "s_1", "temp_23")
+     * </pre>
+     *
+     * <code>string sensor_id = 1;</code>
+     * @return The sensorId.
      */
-    java.lang.String getIdSensor();
+    java.lang.String getSensorId();
     /**
-     * <code>string id_sensor = 1;</code>
-     * @return The bytes for idSensor.
+     * <pre>
+     * ID do sensor (ex: "s_1", "temp_23")
+     * </pre>
+     *
+     * <code>string sensor_id = 1;</code>
+     * @return The bytes for sensorId.
      */
     com.google.protobuf.ByteString
-        getIdSensorBytes();
+        getSensorIdBytes();
 
     /**
-     * <code>double valor = 2;</code>
-     * @return The valor.
+     * <pre>
+     * Timestamp da leitura (em milissegundos)
+     * </pre>
+     *
+     * <code>int64 timestamp = 2;</code>
+     * @return The timestamp.
      */
-    double getValor();
+    long getTimestamp();
+
+    /**
+     * <pre>
+     * Tipo (ex: "temp", "humidity", "pressure")
+     * </pre>
+     *
+     * <code>string measurement_type = 3;</code>
+     * @return The measurementType.
+     */
+    java.lang.String getMeasurementType();
+    /**
+     * <pre>
+     * Tipo (ex: "temp", "humidity", "pressure")
+     * </pre>
+     *
+     * <code>string measurement_type = 3;</code>
+     * @return The bytes for measurementType.
+     */
+    com.google.protobuf.ByteString
+        getMeasurementTypeBytes();
+
+    /**
+     * <pre>
+     * O valor da medição
+     * </pre>
+     *
+     * <code>double value = 4;</code>
+     * @return The value.
+     */
+    double getValue();
+
+    /**
+     * <pre>
+     * Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+     * </pre>
+     *
+     * <code>string latitude = 5;</code>
+     * @return The latitude.
+     */
+    java.lang.String getLatitude();
+    /**
+     * <pre>
+     * Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+     * </pre>
+     *
+     * <code>string latitude = 5;</code>
+     * @return The bytes for latitude.
+     */
+    com.google.protobuf.ByteString
+        getLatitudeBytes();
+
+    /**
+     * <code>string longitude = 6;</code>
+     * @return The longitude.
+     */
+    java.lang.String getLongitude();
+    /**
+     * <code>string longitude = 6;</code>
+     * @return The bytes for longitude.
+     */
+    com.google.protobuf.ByteString
+        getLongitudeBytes();
   }
   /**
-   * Protobuf type {@code SensorLeitura}
+   * <pre>
+   * A mensagem que representa uma única leitura do dataset
+   * </pre>
+   *
+   * Protobuf type {@code com.meutrabalho.proto.SensorLeitura}
    */
   public static final class SensorLeitura extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:SensorLeitura)
+      // @@protoc_insertion_point(message_implements:com.meutrabalho.proto.SensorLeitura)
       SensorLeituraOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use SensorLeitura.newBuilder() to construct.
@@ -50,7 +128,10 @@ public final class SensorProtos {
       super(builder);
     }
     private SensorLeitura() {
-      idSensor_ = "";
+      sensorId_ = "";
+      measurementType_ = "";
+      latitude_ = "";
+      longitude_ = "";
     }
 
     @java.lang.Override
@@ -62,65 +143,225 @@ public final class SensorProtos {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.meutrabalho.proto.SensorProtos.internal_static_SensorLeitura_descriptor;
+      return com.meutrabalho.proto.SensorProtos.internal_static_com_meutrabalho_proto_SensorLeitura_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.meutrabalho.proto.SensorProtos.internal_static_SensorLeitura_fieldAccessorTable
+      return com.meutrabalho.proto.SensorProtos.internal_static_com_meutrabalho_proto_SensorLeitura_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.meutrabalho.proto.SensorProtos.SensorLeitura.class, com.meutrabalho.proto.SensorProtos.SensorLeitura.Builder.class);
     }
 
-    public static final int ID_SENSOR_FIELD_NUMBER = 1;
+    public static final int SENSOR_ID_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object idSensor_ = "";
+    private volatile java.lang.Object sensorId_ = "";
     /**
-     * <code>string id_sensor = 1;</code>
-     * @return The idSensor.
+     * <pre>
+     * ID do sensor (ex: "s_1", "temp_23")
+     * </pre>
+     *
+     * <code>string sensor_id = 1;</code>
+     * @return The sensorId.
      */
     @java.lang.Override
-    public java.lang.String getIdSensor() {
-      java.lang.Object ref = idSensor_;
+    public java.lang.String getSensorId() {
+      java.lang.Object ref = sensorId_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        idSensor_ = s;
+        sensorId_ = s;
         return s;
       }
     }
     /**
-     * <code>string id_sensor = 1;</code>
-     * @return The bytes for idSensor.
+     * <pre>
+     * ID do sensor (ex: "s_1", "temp_23")
+     * </pre>
+     *
+     * <code>string sensor_id = 1;</code>
+     * @return The bytes for sensorId.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getIdSensorBytes() {
-      java.lang.Object ref = idSensor_;
+        getSensorIdBytes() {
+      java.lang.Object ref = sensorId_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        idSensor_ = b;
+        sensorId_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
 
-    public static final int VALOR_FIELD_NUMBER = 2;
-    private double valor_ = 0D;
+    public static final int TIMESTAMP_FIELD_NUMBER = 2;
+    private long timestamp_ = 0L;
     /**
-     * <code>double valor = 2;</code>
-     * @return The valor.
+     * <pre>
+     * Timestamp da leitura (em milissegundos)
+     * </pre>
+     *
+     * <code>int64 timestamp = 2;</code>
+     * @return The timestamp.
      */
     @java.lang.Override
-    public double getValor() {
-      return valor_;
+    public long getTimestamp() {
+      return timestamp_;
+    }
+
+    public static final int MEASUREMENT_TYPE_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object measurementType_ = "";
+    /**
+     * <pre>
+     * Tipo (ex: "temp", "humidity", "pressure")
+     * </pre>
+     *
+     * <code>string measurement_type = 3;</code>
+     * @return The measurementType.
+     */
+    @java.lang.Override
+    public java.lang.String getMeasurementType() {
+      java.lang.Object ref = measurementType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        measurementType_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Tipo (ex: "temp", "humidity", "pressure")
+     * </pre>
+     *
+     * <code>string measurement_type = 3;</code>
+     * @return The bytes for measurementType.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getMeasurementTypeBytes() {
+      java.lang.Object ref = measurementType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        measurementType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VALUE_FIELD_NUMBER = 4;
+    private double value_ = 0D;
+    /**
+     * <pre>
+     * O valor da medição
+     * </pre>
+     *
+     * <code>double value = 4;</code>
+     * @return The value.
+     */
+    @java.lang.Override
+    public double getValue() {
+      return value_;
+    }
+
+    public static final int LATITUDE_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object latitude_ = "";
+    /**
+     * <pre>
+     * Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+     * </pre>
+     *
+     * <code>string latitude = 5;</code>
+     * @return The latitude.
+     */
+    @java.lang.Override
+    public java.lang.String getLatitude() {
+      java.lang.Object ref = latitude_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        latitude_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+     * </pre>
+     *
+     * <code>string latitude = 5;</code>
+     * @return The bytes for latitude.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getLatitudeBytes() {
+      java.lang.Object ref = latitude_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        latitude_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int LONGITUDE_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object longitude_ = "";
+    /**
+     * <code>string longitude = 6;</code>
+     * @return The longitude.
+     */
+    @java.lang.Override
+    public java.lang.String getLongitude() {
+      java.lang.Object ref = longitude_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        longitude_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string longitude = 6;</code>
+     * @return The bytes for longitude.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getLongitudeBytes() {
+      java.lang.Object ref = longitude_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        longitude_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     private byte memoizedIsInitialized = -1;
@@ -137,11 +378,23 @@ public final class SensorProtos {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idSensor_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, idSensor_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sensorId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, sensorId_);
       }
-      if (java.lang.Double.doubleToRawLongBits(valor_) != 0) {
-        output.writeDouble(2, valor_);
+      if (timestamp_ != 0L) {
+        output.writeInt64(2, timestamp_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(measurementType_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, measurementType_);
+      }
+      if (java.lang.Double.doubleToRawLongBits(value_) != 0) {
+        output.writeDouble(4, value_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(latitude_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, latitude_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(longitude_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, longitude_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -152,12 +405,25 @@ public final class SensorProtos {
       if (size != -1) return size;
 
       size = 0;
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idSensor_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, idSensor_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sensorId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, sensorId_);
       }
-      if (java.lang.Double.doubleToRawLongBits(valor_) != 0) {
+      if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, valor_);
+          .computeInt64Size(2, timestamp_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(measurementType_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, measurementType_);
+      }
+      if (java.lang.Double.doubleToRawLongBits(value_) != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, value_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(latitude_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, latitude_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(longitude_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, longitude_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -174,11 +440,19 @@ public final class SensorProtos {
       }
       com.meutrabalho.proto.SensorProtos.SensorLeitura other = (com.meutrabalho.proto.SensorProtos.SensorLeitura) obj;
 
-      if (!getIdSensor()
-          .equals(other.getIdSensor())) return false;
-      if (java.lang.Double.doubleToLongBits(getValor())
+      if (!getSensorId()
+          .equals(other.getSensorId())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!getMeasurementType()
+          .equals(other.getMeasurementType())) return false;
+      if (java.lang.Double.doubleToLongBits(getValue())
           != java.lang.Double.doubleToLongBits(
-              other.getValor())) return false;
+              other.getValue())) return false;
+      if (!getLatitude()
+          .equals(other.getLatitude())) return false;
+      if (!getLongitude()
+          .equals(other.getLongitude())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -190,11 +464,20 @@ public final class SensorProtos {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ID_SENSOR_FIELD_NUMBER;
-      hash = (53 * hash) + getIdSensor().hashCode();
-      hash = (37 * hash) + VALOR_FIELD_NUMBER;
+      hash = (37 * hash) + SENSOR_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getSensorId().hashCode();
+      hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getValor()));
+          getTimestamp());
+      hash = (37 * hash) + MEASUREMENT_TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getMeasurementType().hashCode();
+      hash = (37 * hash) + VALUE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getValue()));
+      hash = (37 * hash) + LATITUDE_FIELD_NUMBER;
+      hash = (53 * hash) + getLatitude().hashCode();
+      hash = (37 * hash) + LONGITUDE_FIELD_NUMBER;
+      hash = (53 * hash) + getLongitude().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -293,21 +576,25 @@ public final class SensorProtos {
       return builder;
     }
     /**
-     * Protobuf type {@code SensorLeitura}
+     * <pre>
+     * A mensagem que representa uma única leitura do dataset
+     * </pre>
+     *
+     * Protobuf type {@code com.meutrabalho.proto.SensorLeitura}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:SensorLeitura)
+        // @@protoc_insertion_point(builder_implements:com.meutrabalho.proto.SensorLeitura)
         com.meutrabalho.proto.SensorProtos.SensorLeituraOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.meutrabalho.proto.SensorProtos.internal_static_SensorLeitura_descriptor;
+        return com.meutrabalho.proto.SensorProtos.internal_static_com_meutrabalho_proto_SensorLeitura_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.meutrabalho.proto.SensorProtos.internal_static_SensorLeitura_fieldAccessorTable
+        return com.meutrabalho.proto.SensorProtos.internal_static_com_meutrabalho_proto_SensorLeitura_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 com.meutrabalho.proto.SensorProtos.SensorLeitura.class, com.meutrabalho.proto.SensorProtos.SensorLeitura.Builder.class);
       }
@@ -326,15 +613,19 @@ public final class SensorProtos {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        idSensor_ = "";
-        valor_ = 0D;
+        sensorId_ = "";
+        timestamp_ = 0L;
+        measurementType_ = "";
+        value_ = 0D;
+        latitude_ = "";
+        longitude_ = "";
         return this;
       }
 
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.meutrabalho.proto.SensorProtos.internal_static_SensorLeitura_descriptor;
+        return com.meutrabalho.proto.SensorProtos.internal_static_com_meutrabalho_proto_SensorLeitura_descriptor;
       }
 
       @java.lang.Override
@@ -362,10 +653,22 @@ public final class SensorProtos {
       private void buildPartial0(com.meutrabalho.proto.SensorProtos.SensorLeitura result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.idSensor_ = idSensor_;
+          result.sensorId_ = sensorId_;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.valor_ = valor_;
+          result.timestamp_ = timestamp_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.measurementType_ = measurementType_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.value_ = value_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.latitude_ = latitude_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.longitude_ = longitude_;
         }
       }
 
@@ -413,13 +716,31 @@ public final class SensorProtos {
 
       public Builder mergeFrom(com.meutrabalho.proto.SensorProtos.SensorLeitura other) {
         if (other == com.meutrabalho.proto.SensorProtos.SensorLeitura.getDefaultInstance()) return this;
-        if (!other.getIdSensor().isEmpty()) {
-          idSensor_ = other.idSensor_;
+        if (!other.getSensorId().isEmpty()) {
+          sensorId_ = other.sensorId_;
           bitField0_ |= 0x00000001;
           onChanged();
         }
-        if (other.getValor() != 0D) {
-          setValor(other.getValor());
+        if (other.getTimestamp() != 0L) {
+          setTimestamp(other.getTimestamp());
+        }
+        if (!other.getMeasurementType().isEmpty()) {
+          measurementType_ = other.measurementType_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (other.getValue() != 0D) {
+          setValue(other.getValue());
+        }
+        if (!other.getLatitude().isEmpty()) {
+          latitude_ = other.latitude_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        if (!other.getLongitude().isEmpty()) {
+          longitude_ = other.longitude_;
+          bitField0_ |= 0x00000020;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -448,15 +769,35 @@ public final class SensorProtos {
                 done = true;
                 break;
               case 10: {
-                idSensor_ = input.readStringRequireUtf8();
+                sensorId_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
-              case 17: {
-                valor_ = input.readDouble();
+              case 16: {
+                timestamp_ = input.readInt64();
                 bitField0_ |= 0x00000002;
                 break;
-              } // case 17
+              } // case 16
+              case 26: {
+                measurementType_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 33: {
+                value_ = input.readDouble();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 33
+              case 42: {
+                latitude_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                longitude_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -474,106 +815,438 @@ public final class SensorProtos {
       }
       private int bitField0_;
 
-      private java.lang.Object idSensor_ = "";
+      private java.lang.Object sensorId_ = "";
       /**
-       * <code>string id_sensor = 1;</code>
-       * @return The idSensor.
+       * <pre>
+       * ID do sensor (ex: "s_1", "temp_23")
+       * </pre>
+       *
+       * <code>string sensor_id = 1;</code>
+       * @return The sensorId.
        */
-      public java.lang.String getIdSensor() {
-        java.lang.Object ref = idSensor_;
+      public java.lang.String getSensorId() {
+        java.lang.Object ref = sensorId_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          idSensor_ = s;
+          sensorId_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
         }
       }
       /**
-       * <code>string id_sensor = 1;</code>
-       * @return The bytes for idSensor.
+       * <pre>
+       * ID do sensor (ex: "s_1", "temp_23")
+       * </pre>
+       *
+       * <code>string sensor_id = 1;</code>
+       * @return The bytes for sensorId.
        */
       public com.google.protobuf.ByteString
-          getIdSensorBytes() {
-        java.lang.Object ref = idSensor_;
+          getSensorIdBytes() {
+        java.lang.Object ref = sensorId_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          idSensor_ = b;
+          sensorId_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
       /**
-       * <code>string id_sensor = 1;</code>
-       * @param value The idSensor to set.
+       * <pre>
+       * ID do sensor (ex: "s_1", "temp_23")
+       * </pre>
+       *
+       * <code>string sensor_id = 1;</code>
+       * @param value The sensorId to set.
        * @return This builder for chaining.
        */
-      public Builder setIdSensor(
+      public Builder setSensorId(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        idSensor_ = value;
+        sensorId_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
-       * <code>string id_sensor = 1;</code>
+       * <pre>
+       * ID do sensor (ex: "s_1", "temp_23")
+       * </pre>
+       *
+       * <code>string sensor_id = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearIdSensor() {
-        idSensor_ = getDefaultInstance().getIdSensor();
+      public Builder clearSensorId() {
+        sensorId_ = getDefaultInstance().getSensorId();
         bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
       /**
-       * <code>string id_sensor = 1;</code>
-       * @param value The bytes for idSensor to set.
+       * <pre>
+       * ID do sensor (ex: "s_1", "temp_23")
+       * </pre>
+       *
+       * <code>string sensor_id = 1;</code>
+       * @param value The bytes for sensorId to set.
        * @return This builder for chaining.
        */
-      public Builder setIdSensorBytes(
+      public Builder setSensorIdBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        idSensor_ = value;
+        sensorId_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
 
-      private double valor_ ;
+      private long timestamp_ ;
       /**
-       * <code>double valor = 2;</code>
-       * @return The valor.
+       * <pre>
+       * Timestamp da leitura (em milissegundos)
+       * </pre>
+       *
+       * <code>int64 timestamp = 2;</code>
+       * @return The timestamp.
        */
       @java.lang.Override
-      public double getValor() {
-        return valor_;
+      public long getTimestamp() {
+        return timestamp_;
       }
       /**
-       * <code>double valor = 2;</code>
-       * @param value The valor to set.
+       * <pre>
+       * Timestamp da leitura (em milissegundos)
+       * </pre>
+       *
+       * <code>int64 timestamp = 2;</code>
+       * @param value The timestamp to set.
        * @return This builder for chaining.
        */
-      public Builder setValor(double value) {
+      public Builder setTimestamp(long value) {
 
-        valor_ = value;
+        timestamp_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
       /**
-       * <code>double valor = 2;</code>
+       * <pre>
+       * Timestamp da leitura (em milissegundos)
+       * </pre>
+       *
+       * <code>int64 timestamp = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearValor() {
+      public Builder clearTimestamp() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        valor_ = 0D;
+        timestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object measurementType_ = "";
+      /**
+       * <pre>
+       * Tipo (ex: "temp", "humidity", "pressure")
+       * </pre>
+       *
+       * <code>string measurement_type = 3;</code>
+       * @return The measurementType.
+       */
+      public java.lang.String getMeasurementType() {
+        java.lang.Object ref = measurementType_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          measurementType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Tipo (ex: "temp", "humidity", "pressure")
+       * </pre>
+       *
+       * <code>string measurement_type = 3;</code>
+       * @return The bytes for measurementType.
+       */
+      public com.google.protobuf.ByteString
+          getMeasurementTypeBytes() {
+        java.lang.Object ref = measurementType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          measurementType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Tipo (ex: "temp", "humidity", "pressure")
+       * </pre>
+       *
+       * <code>string measurement_type = 3;</code>
+       * @param value The measurementType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMeasurementType(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        measurementType_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Tipo (ex: "temp", "humidity", "pressure")
+       * </pre>
+       *
+       * <code>string measurement_type = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMeasurementType() {
+        measurementType_ = getDefaultInstance().getMeasurementType();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Tipo (ex: "temp", "humidity", "pressure")
+       * </pre>
+       *
+       * <code>string measurement_type = 3;</code>
+       * @param value The bytes for measurementType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMeasurementTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        measurementType_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private double value_ ;
+      /**
+       * <pre>
+       * O valor da medição
+       * </pre>
+       *
+       * <code>double value = 4;</code>
+       * @return The value.
+       */
+      @java.lang.Override
+      public double getValue() {
+        return value_;
+      }
+      /**
+       * <pre>
+       * O valor da medição
+       * </pre>
+       *
+       * <code>double value = 4;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValue(double value) {
+
+        value_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * O valor da medição
+       * </pre>
+       *
+       * <code>double value = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValue() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        value_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object latitude_ = "";
+      /**
+       * <pre>
+       * Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+       * </pre>
+       *
+       * <code>string latitude = 5;</code>
+       * @return The latitude.
+       */
+      public java.lang.String getLatitude() {
+        java.lang.Object ref = latitude_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          latitude_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+       * </pre>
+       *
+       * <code>string latitude = 5;</code>
+       * @return The bytes for latitude.
+       */
+      public com.google.protobuf.ByteString
+          getLatitudeBytes() {
+        java.lang.Object ref = latitude_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          latitude_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+       * </pre>
+       *
+       * <code>string latitude = 5;</code>
+       * @param value The latitude to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLatitude(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        latitude_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+       * </pre>
+       *
+       * <code>string latitude = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLatitude() {
+        latitude_ = getDefaultInstance().getLatitude();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
+       * </pre>
+       *
+       * <code>string latitude = 5;</code>
+       * @param value The bytes for latitude to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLatitudeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        latitude_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object longitude_ = "";
+      /**
+       * <code>string longitude = 6;</code>
+       * @return The longitude.
+       */
+      public java.lang.String getLongitude() {
+        java.lang.Object ref = longitude_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          longitude_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string longitude = 6;</code>
+       * @return The bytes for longitude.
+       */
+      public com.google.protobuf.ByteString
+          getLongitudeBytes() {
+        java.lang.Object ref = longitude_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          longitude_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string longitude = 6;</code>
+       * @param value The longitude to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLongitude(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        longitude_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string longitude = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLongitude() {
+        longitude_ = getDefaultInstance().getLongitude();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string longitude = 6;</code>
+       * @param value The bytes for longitude to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLongitudeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        longitude_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -590,10 +1263,10 @@ public final class SensorProtos {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:SensorLeitura)
+      // @@protoc_insertion_point(builder_scope:com.meutrabalho.proto.SensorLeitura)
     }
 
-    // @@protoc_insertion_point(class_scope:SensorLeitura)
+    // @@protoc_insertion_point(class_scope:com.meutrabalho.proto.SensorLeitura)
     private static final com.meutrabalho.proto.SensorProtos.SensorLeitura DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new com.meutrabalho.proto.SensorProtos.SensorLeitura();
@@ -642,10 +1315,10 @@ public final class SensorProtos {
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_SensorLeitura_descriptor;
+    internal_static_com_meutrabalho_proto_SensorLeitura_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_SensorLeitura_fieldAccessorTable;
+      internal_static_com_meutrabalho_proto_SensorLeitura_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -655,20 +1328,22 @@ public final class SensorProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rleitura.proto\"1\n\rSensorLeitura\022\021\n\tid_s" +
-      "ensor\030\001 \001(\t\022\r\n\005valor\030\002 \001(\001B%\n\025com.meutra" +
-      "balho.protoB\014SensorProtosb\006proto3"
+      "\n\rleitura.proto\022\025com.meutrabalho.proto\"\203" +
+      "\001\n\rSensorLeitura\022\021\n\tsensor_id\030\001 \001(\t\022\021\n\tt" +
+      "imestamp\030\002 \001(\003\022\030\n\020measurement_type\030\003 \001(\t" +
+      "\022\r\n\005value\030\004 \001(\001\022\020\n\010latitude\030\005 \001(\t\022\021\n\tlon" +
+      "gitude\030\006 \001(\tB\016B\014SensorProtosb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         });
-    internal_static_SensorLeitura_descriptor =
+    internal_static_com_meutrabalho_proto_SensorLeitura_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_SensorLeitura_fieldAccessorTable = new
+    internal_static_com_meutrabalho_proto_SensorLeitura_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_SensorLeitura_descriptor,
-        new java.lang.String[] { "IdSensor", "Valor", });
+        internal_static_com_meutrabalho_proto_SensorLeitura_descriptor,
+        new java.lang.String[] { "SensorId", "Timestamp", "MeasurementType", "Value", "Latitude", "Longitude", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
