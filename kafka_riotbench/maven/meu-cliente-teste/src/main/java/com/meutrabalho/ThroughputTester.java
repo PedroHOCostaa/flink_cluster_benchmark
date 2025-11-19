@@ -1,8 +1,7 @@
 package com.meutrabalho;
 
 // Import do Protobuf (gerado pelo Maven)
-import com.meutrabalho.proto.SensorProtos.SensorLeitura;
-
+import com.meutrabalho.proto.EstacaoProtos.EstacaoLeitura; // NOVO IMPORT
 // Imports do Kafka
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -63,7 +62,7 @@ public class ThroughputTester {
     private static final AtomicLong receivedMessageCount = new AtomicLong(0);
     private static final CountDownLatch consumerReadySignal = new CountDownLatch(1);
     private static final AtomicLong targetThroughputPerSec = new AtomicLong(0);
-
+    private static TestMode currentMode = TestMode.RAMP_UP; // Modo padrão: RAMP_UP
     // Lista de Warm-Up: Guarda os bytes[] do Protobuf
     private static final List<byte[]> WARM_UP_DATA = new ArrayList<>();
 
@@ -85,8 +84,28 @@ public class ThroughputTester {
     // Formato do Timestamp no JSON (ex: "2014-02-13T06:20:00")
     private static final DateTimeFormatter ISO_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
+    public enum TestMode {
+        RAMP_UP, // O modo original de aumento gradual
+        FIXED_RATE // O novo modo de taxa fixa
+    }
     public static void main(String[] args) throws Exception {
         System.out.println("Iniciando Teste de Saturação (Stress Test)...");
+        
+        if (args.length >= 2 && "FIXED_RATE".equalsIgnoreCase(args[0])) {
+            try {
+                currentMode = TestMode.FIXED_RATE;
+                long fixedRate = Long.parseLong(args[1]);
+                targetThroughputPerSec.set(fixedRate);
+                rateLimiter.setRate(fixedRate); // Define a taxa inicial
+                System.out.printf("Modo: TAXA FIXA. Taxa alvo: %,d msgs/seg%n", fixedRate);
+            } catch (NumberFormatException e) {
+                System.err.println("### ERRO: A taxa fixa deve ser um número inteiro. Usando RAMP_UP.");
+                currentMode = TestMode.RAMP_UP;
+            }
+        } else {
+            currentMode = TestMode.RAMP_UP;
+            System.out.println("Modo: RAMP-UP (Aumento gradual).");
+        }
 
         // --- PASSO 1: WARM-UP ---
         System.out.println("Fase 1: Warm-Up (Lendo dados reais do disco)...");
@@ -95,7 +114,7 @@ public class ThroughputTester {
             System.err.println("### ERRO: Nenhum dado carregado no Warm-Up. Verifique o DATA_BASE_PATH: " + DATA_BASE_PATH);
             return;
         }
-        System.out.println("Warm-Up completo. " + WARM_UP_DATA.size() + " registros carregados na memória.");
+        System.out.println("Warm-Up completo. " + WARM_UP_DATA.size() + " registros carregados na memória.");        
         
         System.out.println("Fase 2: Iniciando threads...");
         System.out.println("Kafka Broker: " + KAFKA_BROKERS);
@@ -106,7 +125,13 @@ public class ThroughputTester {
         new Thread(ThroughputTester::runConsumer).start();
         new Thread(ThroughputTester::runProducer).start();
         new Thread(ThroughputTester::runMonitor).start();
-        new Thread(ThroughputTester::runLoadController).start();
+        if (currentMode == TestMode.RAMP_UP) {
+            new Thread(ThroughputTester::runLoadController).start();
+        } else {
+            // Se FIXED_RATE, apenas esperamos o consumidor e iniciamos o RateLimiter
+            consumerReadySignal.countDown(); // Sinaliza que estamos prontos imediatamente
+            System.out.println("Consumer 'ready' sinalizado no modo FIXED_RATE.");
+        }
     }
 
     /**

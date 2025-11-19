@@ -3,16 +3,50 @@ syntax = "proto3";
 package com.meutrabalho.proto;
 
 // Define o nome da classe Java externa que conterá todas as mensagens
-option java_outer_classname = "SensorProtos";
+option java_outer_classname = "EstacaoProtos"; // Mudamos o nome para refletir a nova base
 
-// A mensagem que representa uma única leitura do dataset
-message SensorLeitura {
-  string sensor_id = 1;       // ID do sensor (ex: "s_1", "temp_23")
+// A mensagem que representa uma única leitura da Estação de Monitoramento
+message EstacaoLeitura {
+  // Dados de Identificação e Tempo
+  int64 objectid = 1;         // ID do Objeto
   int64 timestamp = 2;        // Timestamp da leitura (em milissegundos)
-  string measurement_type = 3; // Tipo (ex: "temp", "humidity", "pressure")
-  double value = 4;           // O valor da medição
-  
-  // Campos extras que os dados do Aarhus podem ter (vamos incluir por segurança)
-  string latitude = 5;
-  string longitude = 6;
+  int32 codnum = 3;           // Código numérico da estação
+  string estacao = 4;         // Nome da estação
+
+  // Medições Climáticas/Geográficas
+  double chuva = 5;
+  double pres = 6;            // Pressão
+  double rs = 7;              // Radiação Solar
+  double temp = 8;            // Temperatura
+  double ur = 9;              // Umidade Relativa
+  double dir_vento = 10;
+  double vel_vento = 11;
+  double lat = 23;            // Latitude
+  double lon = 24;            // Longitude
+  double x_utm_sirgas2000 = 25;
+  double y_utm_sirgas2000 = 26;
+
+  // Medições de Poluentes (usamos 'optional' para campos ausentes/vazios)
+  // Nota: No CSV, muitos são vazios. Usaremos double e um tratamento na leitura.
+  // Protobuf não tem um ótimo suporte para "ausência" de primitivos,
+  // mas o 'double' com valor especial (NaN ou 0.0) pode ser usado.
+  // Vamos usar 'optional' com o proto3 padrão para campos vazios.
+
+  // Use 'optional' se a sua versão do Protobuf for recente o suficiente (>= 3.15) e
+  // você precisar distinguir entre 0 e ausente. Se não, use double simples e trate o 0.0.
+  // Para simplificar, vamos manter o 'double' e ignorar os campos vazios.
+
+  // Medições de Poluentes (Manter como double e tratar vazios/null como 0.0 na leitura)
+  double so2 = 12;
+  double no2 = 13;
+  double hcnm = 14;
+  double hct = 15;
+  double ch4 = 16;
+  double co = 17;
+  double no = 18;
+  double nox = 19;
+  double o3 = 20;
+  double pm10 = 21;
+  double pm2_5 = 22;
+
 }
