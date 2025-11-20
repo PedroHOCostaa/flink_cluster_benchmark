@@ -56,6 +56,11 @@
                   </excludes>
                 </filter>
               </filters>
+              <transformers>
+                <transformer>
+                  <mainClass>com.exemplo.kafka.ClimaJob</mainClass>
+                </transformer>
+              </transformers>
             </configuration>
           </execution>
         </executions>
