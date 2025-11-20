@@ -1,3 +1,4 @@
+com/exemplo/kafka/AppUnificado$CsvExporterTask.class
 com/exemplo/kafka/proto/ClimaDataProto$ClimaRegistro$1.class
 com/exemplo/kafka/AppUnificado.class
 com/exemplo/kafka/AppUnificado$ProducerTask.class

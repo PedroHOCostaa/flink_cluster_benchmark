@@ -8,9 +8,9 @@ option java_outer_classname = "ClimaDataProto";
 message ClimaRegistro {
   int64 objectid = 1;
   string data = 2; 
-  
   optional int32 codnum = 3;
   optional string estacao = 4;
+  
   optional double chuva = 5;
   optional double pres = 6;
   optional double rs = 7;
@@ -29,6 +29,7 @@ message ClimaRegistro {
   optional double o3 = 20;
   optional double pm10 = 21;
   optional double pm2_5 = 22;
+  
   optional double lat = 23;
   optional double lon = 24;
   optional double x_utm_sirgas2000 = 25;
