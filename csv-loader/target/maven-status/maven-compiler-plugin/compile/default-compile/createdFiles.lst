@@ -1,0 +1,9 @@
+com/exemplo/kafka/proto/ClimaDataProto$ClimaRegistro$1.class
+com/exemplo/kafka/AppUnificado.class
+com/exemplo/kafka/AppUnificado$ProducerTask.class
+com/exemplo/kafka/proto/ClimaDataProto.class
+com/exemplo/kafka/AppUnificado$MonitorTask.class
+com/exemplo/kafka/proto/ClimaDataProto$ClimaRegistroOrBuilder.class
+com/exemplo/kafka/proto/ClimaDataProto$ClimaRegistro$Builder.class
+com/exemplo/kafka/proto/ClimaDataProto$ClimaRegistro.class
+com/exemplo/kafka/ProducerApp.class

@@ -1,0 +1,8 @@
+com/exemplo/kafka/ClimaJob.class
+com/exemplo/kafka/proto/ClimaDataProto$ClimaRegistro$1.class
+com/exemplo/kafka/proto/ClimaDataProto.class
+com/exemplo/kafka/ClimaJob$ClimaProtoDeserializer.class
+com/exemplo/kafka/proto/ClimaDataProto$ClimaRegistroOrBuilder.class
+com/exemplo/kafka/ClimaJob$ClimaProtoPartitionerSerializer.class
+com/exemplo/kafka/proto/ClimaDataProto$ClimaRegistro$Builder.class
+com/exemplo/kafka/proto/ClimaDataProto$ClimaRegistro.class
