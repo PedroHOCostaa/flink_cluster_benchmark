@@ -1,6 +1,7 @@
 package com.exemplo.kafka;
 
-import com.exemplo.kafka.proto.ClimaDataProto.ClimaRegistro;
+import java.io.IOException;
+
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -12,7 +13,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import java.io.IOException;
+import com.exemplo.kafka.proto.ClimaDataProto.ClimaRegistro;
 
 public class ClimaJob {
 
@@ -21,7 +22,7 @@ public class ClimaJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // ATENÇÃO: Ajuste o bootstrap server conforme sua rede (ex: "kafka:9092" se dentro do docker)
-        String bootstrapServers = "kafka:9092";
+        String bootstrapServers = "172.16.16.3:9092";
         String inputTopic = "topic-clima-entrada";
         String outputTopic = "topic-clima-saida";
 

@@ -15,9 +15,9 @@ kafka-console-producer --bootstrap-server localhost:9092 --topic test_topic
 kafka-console-consumer --topic test_topic --bootstrap-server localhost:9092
 ```
 
-### Tópico de entrada
+### Tópicos Utilizados no teste
 ```bash
-kafka-topics --create --topic topico-entrada --bootstrap-server localhost:9092 --partitions 12 --replication-factor 1
-kafka-topics --create --topic topico-saida-agregado --bootstrap-server localhost:9092 --partitions 12 --replication-factor 1
+kafka-topics --create --topic topico-clima-entrada --bootstrap-server localhost:9092 --partitions 12 --replication-factor 1
+kafka-topics --create --topic topico-clima-saida --bootstrap-server localhost:9092 --partitions 12 --replication-factor 1
 ```
 
