@@ -39,19 +39,68 @@ public class ClimaJob {
 
         // 3. Processamento (Arrumar o DataSet)
         DataStream<ClimaRegistro> processedStream = stream.map(registro -> {
-            // Para "arrumar" o dataset e setar campos como NULL:
             // Em Protobuf 3 com 'optional', se você não setar o campo, ele é considerado inexistente (null).
             // Se o dado já veio preenchido e você quer limpar baseado em alguma regra, use clearField().
             
             ClimaRegistro.Builder builder = registro.toBuilder();
 
-            // Exemplo: Se a temperatura for um erro de leitura (ex: -999), limpamos o campo.
+            // Dados que opcionais que iremos simular o tratamento de dados defeituosos 
+            // [chuva pres rs temp ur dir_vento vel_vento so2 no2 hcnm hct ch4 co no nox o3 pm10 pm2_5]
+            if (builder.hasChuva() && builder.getChuva() == -999.0) {
+                builder.clearChuva(); 
+            }
+            if (builder.hasPres() && builder.getPres() == -999.0) {
+                builder.clearPres(); 
+            }
+            if (builder.hasRs() && builder.getRs() == -999.0) {
+                builder.clearRs(); 
+            }
             if (builder.hasTemp() && builder.getTemp() == -999.0) {
-                builder.clearTemp(); // O campo 'temp' agora será tratado como missing/null
+                builder.clearTemp(); 
+            }
+            if (builder.hasUr() && builder.getUr() == -999.0) {
+                builder.clearUr(); 
+            }
+            if (builder.hasDirVento() && builder.getDirVento() == -999.0) {
+                builder.clearDirVento(); 
+            }
+            if (builder.hasVelVento() && builder.getVelVento() == -999.0) {
+                builder.clearVelVento(); 
+            }
+            if (builder.hasSo2() && builder.getSo2() == -999.0) {
+                builder.clearSo2(); 
+            }
+            if (builder.hasNo2() && builder.getNo2() == -999.0) {
+                builder.clearNo2(); 
+            }
+            if (builder.hasHcnm() && builder.getHcnm() == -999.0) {
+                builder.clearHcnm(); 
+            }
+            if (builder.hasHct() && builder.getHct() == -999.0) {
+                builder.clearHct(); 
+            }
+            if (builder.hasCh4() && builder.getCh4() == -999.0) {
+                builder.clearCh4(); 
+            }
+            if (builder.hasCo() && builder.getCo() == -999.0) {
+                builder.clearCo(); 
+            }
+            if (builder.hasNo() && builder.getNo() == -999.0) {
+                builder.clearNo(); 
+            }
+            if (builder.hasNox() && builder.getNox() == -999.0) {
+                builder.clearNox(); 
+            }
+            if (builder.hasO3() && builder.getO3() == -999.0) {
+                builder.clearO3(); 
+            }
+            if (builder.hasPm10() && builder.getPm10() == -999.0) {
+                builder.clearPm10(); 
+            }
+            if (builder.hasPm25() && builder.getPm25() == -999.0) {
+                builder.clearPm25(); 
             }
             
-            // Se você quiser garantir que todos os opcionais não setados continuem assim, 
-            // o builder já preserva isso automaticamente.
 
             return builder.build();
         });
