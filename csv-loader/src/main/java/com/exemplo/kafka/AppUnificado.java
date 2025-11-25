@@ -29,53 +29,85 @@ import com.opencsv.CSVWriter;
 public class AppUnificado {
 
     // --- CONFIGURAÇÕES ---
-    private static final String KAFKA_BROKER = "localhost:9092";
+    // Ajuste o IP conforme necessário (localhost ou IP da rede docker)
+    private static final String KAFKA_BROKER = "172.16.16.3:9092"; 
     private static final String CSV_INPUT = "dados.csv";
     private static final String CSV_OUTPUT = "saida_kafka.csv";
 
-    // Tópicos
-    private static final String TOPIC_PRODUCER = "topico-clima-dados"; 
-    private static final String TOPIC_CONSUMER = "topico-leitura-8-particoes";
+    private static final String TOPIC_PRODUCER = "topic-clima-entrada"; 
+    private static final String TOPIC_CONSUMER = "topic-clima-saida";
     private static final String GROUP_MONITOR = "grupo-monitor-throughput";
     private static final String GROUP_CSV_EXPORT = "grupo-csv-exporter";
 
     public static void main(String[] args) {
+        // Validação básica de argumentos
+        if (args.length < 2) {
+            exibirAjuda();
+            System.exit(1);
+        }
+
+        String modoLeitura = args[0].toLowerCase(); // normal | exportador
+        String modoEscrita = args[1].toLowerCase(); // fixo | stress
+
+        // Validação Modo Leitura
+        if (!modoLeitura.equals("normal") && !modoLeitura.equals("exportador")) {
+            System.err.println("Erro: Modo de leitura deve ser 'normal' ou 'exportador'.");
+            System.exit(1);
+        }
+
+        // Validação Modo Escrita e Taxa
+        int taxaProdutor = 0;
+        boolean isStress = false;
+
+        if (modoEscrita.equals("stress")) {
+            isStress = true;
+            taxaProdutor = 10000; // Valor inicial do stress conforme solicitado
+        } else if (modoEscrita.equals("fixo")) {
+            if (args.length < 3) {
+                System.err.println("Erro: Para modo 'fixo', informe a taxa. Ex: fixo 20000");
+                System.exit(1);
+            }
+            try {
+                taxaProdutor = Integer.parseInt(args[2]);
+            } catch (NumberFormatException e) {
+                System.err.println("Erro: A taxa deve ser um número inteiro.");
+                System.exit(1);
+            }
+        } else {
+            System.err.println("Erro: Modo de escrita deve ser 'fixo' ou 'stress'.");
+            System.exit(1);
+        }
+
+        // --- INICIALIZAÇÃO ---
+        System.out.println("========== CONFIGURAÇÃO INICIADA ==========");
+        System.out.println("-> Modo Leitura (Topic Saída): " + modoLeitura.toUpperCase());
+        System.out.println("-> Modo Escrita (Topic Entrada): " + modoEscrita.toUpperCase());
+        System.out.println("-> Taxa Inicial Produtor: " + taxaProdutor + " msg/s");
+        System.out.println("===========================================");
+
         ExecutorService executor = Executors.newCachedThreadPool();
 
-        if (args.length == 0) {
-            System.out.println(">>> MODO PADRÃO: Throughput fixo de 15.000 msg/s");
-            iniciarProdutorEMonitor(executor, 15000, false);
-        } else {
-            String modo = args[0].toLowerCase();
+        // 1. Inicia Produtor (Sempre roda, conforme lógica definida)
+        executor.submit(new ProducerTask(taxaProdutor, isStress));
 
-            if (modo.equals("stress")) {
-                System.out.println(">>> MODO ESTRESSE: Inicio 6.000 msg/s | +1.000 a cada 5s");
-                iniciarProdutorEMonitor(executor, 6000, true);
-            
-            } else if (modo.equals("csv")) {
-                System.out.println(">>> MODO CSV EXPORTER: Lendo Kafka -> " + CSV_OUTPUT);
-                executor.submit(new CsvExporterTask());
-            
-            } else {
-                try {
-                    int rate = Integer.parseInt(modo);
-                    System.out.println(">>> MODO PERSONALIZADO: Throughput fixo de " + rate + " msg/s");
-                    iniciarProdutorEMonitor(executor, rate, false);
-                } catch (NumberFormatException e) {
-                    System.err.println("Use: <numero>, 'stress' ou 'csv'");
-                    System.exit(1);
-                }
-            }
+        // 2. Inicia Consumidor (Baseado no modo)
+        if (modoLeitura.equals("exportador")) {
+            executor.submit(new CsvExporterTask());
+        } else {
+            executor.submit(new MonitorTask());
         }
     }
 
-    private static void iniciarProdutorEMonitor(ExecutorService executor, int startRate, boolean stressMode) {
-        executor.submit(new ProducerTask(startRate, stressMode));
-        executor.submit(new MonitorTask());
+    private static void exibirAjuda() {
+        System.out.println("Uso incorreto. Exemplos:");
+        System.out.println("  java -jar app.jar normal stress");
+        System.out.println("  java -jar app.jar exportador stress");
+        System.out.println("  java -jar app.jar normal fixo 20000");
+        System.out.println("  java -jar app.jar exportador fixo 20000");
     }
 
     // =================================================================================
-    // TAREFA PRODUTORA
+    // TAREFA PRODUTORA (Entrada Kafka)
     // =================================================================================
     static class ProducerTask implements Runnable {
         private int currentRateLimit;
@@ -94,14 +126,15 @@ public class AppUnificado {
             props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER);
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+            // Otimizações para alto throughput
             props.put(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(64 * 1024));
             props.put(ProducerConfig.LINGER_MS_CONFIG, "10");
             props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
 
+            // Callback para logar erros de conexão
             try (KafkaProducer<String, byte[]> producer = new KafkaProducer<>(props)) {
-                System.out.println("[PRODUTOR] Carregando CSV...");
+                System.out.println("[PRODUTOR] Carregando CSV para memória...");
                 List<byte[]> cache = new ArrayList<>();
-                
                 try (CSVReader reader = new CSVReader(new FileReader(CSV_INPUT))) {
                     String[] line;
                     reader.readNext(); // Pular Header
@@ -110,7 +143,7 @@ public class AppUnificado {
                     }
                 } catch (Exception e) { e.printStackTrace(); return; }
 
-                System.out.println("[PRODUTOR] Envio iniciado. Taxa: " + currentRateLimit + " msg/s");
+                System.out.println("[PRODUTOR] Envio iniciado...");
 
                 long startWindow = System.currentTimeMillis();
                 long lastStressUpdate = System.currentTimeMillis();
@@ -118,7 +151,9 @@ public class AppUnificado {
 
                 while (!Thread.currentThread().isInterrupted()) {
                     for (byte[] payload : cache) {
-                        producer.send(new ProducerRecord<>(TOPIC_PRODUCER, null, payload));
+                        producer.send(new ProducerRecord<>(TOPIC_PRODUCER, null, payload), (m, e) -> {
+                            if (e != null) e.printStackTrace();
+                        });
 
                         msgCount++;
                         if (msgCount >= currentRateLimit) {
@@ -132,7 +167,7 @@ public class AppUnificado {
 
                             if (stressMode && (now - lastStressUpdate > stressIntervalMs)) {
                                 currentRateLimit += stressStep;
-                                System.out.println(">>> [ESTRESSE] Taxa: " + currentRateLimit + " msg/s");
+                                System.out.println(">>> [PRODUTOR-STRESS] Taxa aumentada para: " + currentRateLimit + " msg/s");
                                 lastStressUpdate = now;
                             }
                         }
@@ -141,12 +176,9 @@ public class AppUnificado {
             }
         }
 
-        // --- BUILDER COM SUPORTE A NULOS ---
-        // Só chamamos o .setCampo() se o valor existir no CSV.
-        // Se estiver vazio, o campo fica 'unset' no Protobuf.
+        // Builder Protobuf (Mantendo campos vazios como unset)
         private ClimaRegistro buildProtoFromCsv(String[] cols) {
             ClimaRegistro.Builder b = ClimaRegistro.newBuilder();
-            
             if (hasVal(cols, 0)) b.setObjectid(Long.parseLong(cols[0]));
             if (hasVal(cols, 1)) b.setData(cols[1]);
             if (hasVal(cols, 2)) b.setCodnum(Integer.parseInt(cols[2]));
@@ -173,18 +205,15 @@ public class AppUnificado {
             if (hasVal(cols, 23)) b.setLon(Double.parseDouble(cols[23]));
             if (hasVal(cols, 24)) b.setXUtmSirgas2000(Double.parseDouble(cols[24]));
             if (hasVal(cols, 25)) b.setYUtmSirgas2000(Double.parseDouble(cols[25]));
-
             return b.build();
         }
-
-        // Verifica se a coluna existe E não está vazia
         private boolean hasVal(String[] cols, int index) {
             return index < cols.length && cols[index] != null && !cols[index].trim().isEmpty();
         }
     }
 
     // =================================================================================
-    // TAREFA MONITOR
+    // TAREFA MONITOR (Modo Normal: Apenas Throughput, sem disco)
     // =================================================================================
     static class MonitorTask implements Runnable {
         @Override
@@ -198,17 +227,19 @@ public class AppUnificado {
 
             try (KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<>(props)) {
                 consumer.subscribe(Collections.singletonList(TOPIC_CONSUMER));
+                System.out.println("[MONITOR] Iniciado. Aguardando dados no tópico de saída...");
+                
                 long startWindow = System.currentTimeMillis();
                 long msgCount = 0;
 
                 while (!Thread.currentThread().isInterrupted()) {
                     ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofMillis(100));
-                    msgCount += records.count();
+                    msgCount += records.count(); // Operação rápida, sem parse
 
                     long now = System.currentTimeMillis();
                     if (now - startWindow >= 1000) {
                         double rate = msgCount / ((now - startWindow) / 1000.0);
-                        if (rate > 0) System.out.printf(">>> [MONITOR] Taxa Leitura: %.0f msgs/s%n", rate);
+                        if (rate > 0) System.out.printf(">>> [LEITURA-NORMAL] Throughput: %.0f msgs/s%n", rate);
                         startWindow = now;
                         msgCount = 0;
                     }
@@ -218,7 +249,7 @@ public class AppUnificado {
     }
 
     // =================================================================================
-    // TAREFA EXPORTADOR CSV (Preserva Nulos como ,,)
+    // TAREFA EXPORTADOR (Modo Exportador: Throughput + Gravação CSV)
     // =================================================================================
     static class CsvExporterTask implements Runnable {
         @Override
@@ -228,7 +259,7 @@ public class AppUnificado {
             props.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_CSV_EXPORT);
             props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
             props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-            props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); 
+            props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest"); 
 
             try (KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<>(props);
                  CSVWriter writer = new CSVWriter(new FileWriter(CSV_OUTPUT))) {
@@ -238,29 +269,49 @@ public class AppUnificado {
                 String[] header = {"objectid","data","codnum","estacao","chuva","pres","rs","temp","ur","dir_vento","vel_vento","so2","no2","hcnm","hct","ch4","co","no","nox","o3","pm10","pm2_5","lat","lon","x_utm","y_utm"};
                 writer.writeNext(header);
 
-                System.out.println("[CSV EXPORTER] Escrevendo em " + CSV_OUTPUT + "...");
+                System.out.println("[EXPORTADOR] Iniciado. Gravando em " + CSV_OUTPUT);
                 
+                long startWindow = System.currentTimeMillis();
+                long msgCountWindow = 0;
+                long totalCount = 0;
+
                 while (!Thread.currentThread().isInterrupted()) {
-                    ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofMillis(500));
+                    ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofMillis(100));
+                    
                     for (ConsumerRecord<byte[], byte[]> record : records) {
                         try {
+                            // Parse Protobuf
                             ClimaRegistro reg = ClimaRegistro.parseFrom(record.value());
+                            // Grava no CSV
                             writer.writeNext(convertProtoToStrings(reg));
-                        } catch (Exception e) { /* ignore */ }
+                            
+                            msgCountWindow++;
+                            totalCount++;
+                        } catch (Exception e) {}
                     }
-                    writer.flush(); 
+                    
+                    // Flush periódico para garantir gravação
+                    if (!records.isEmpty()) writer.flush();
+
+                    // Calculo do Throughput (Igual ao Monitor)
+                    long now = System.currentTimeMillis();
+                    if (now - startWindow >= 1000) {
+                        double rate = msgCountWindow / ((now - startWindow) / 1000.0);
+                        if (rate > 0) {
+                            System.out.printf(">>> [LEITURA-EXPORTADOR] Throughput: %.0f msgs/s | Total Gravado: %d%n", rate, totalCount);
+                        }
+                        startWindow = now;
+                        msgCountWindow = 0;
+                    }
                 }
             } catch (IOException e) { e.printStackTrace(); }
         }
 
-        // --- CONVERSÃO PROTO -> STRING (Com suporte a nulos) ---
-        // Utilizamos o operador ternário:
-        // SE (reg.hasCampo()) ENTÃO String.valueOf(valor) SENÃO "" (string vazia)
+        // Converte respeitando os Nulos (hasField ? valor : "")
         private String[] convertProtoToStrings(ClimaRegistro r) {
             return new String[] {
-                String.valueOf(r.getObjectid()), // IDs geralmente sempre existem
+                String.valueOf(r.getObjectid()),
                 r.getData(),
-                
                 r.hasCodnum() ? String.valueOf(r.getCodnum()) : "",
                 r.hasEstacao() ? r.getEstacao() : "",
                 r.hasChuva() ? String.valueOf(r.getChuva()) : "",

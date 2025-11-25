@@ -5,17 +5,6 @@ FLINK_LOCAL = ./flink/local/
 FLINK_RASP = ./flink/rasp/
 FLINK_TRAD = ./flink/tradicional/
 
-JOB_PROJECT_DIR = ./flink/jobs/maven/meu-job-flink
-CONSUMIDOR_DIR = ./kafka_riotbench/maven/meu-cliente-teste
-
-# NOVO TARGET: Constrói o seu Job Flink executando 'mvn clean package'
-build_job:
-	cd $(JOB_PROJECT_DIR) && mvn clean package
-
-build_consumidor:
-	cd $(CONSUMIDOR_DIR) && mvn clean package -Dmaven.test.skip=true
-
-
 build_all:
 	docker build --no-cache -t iot-stream-flink-benchmark_local $(FLINK_LOCAL)
 	docker buildx build --platform linux/arm64 -t $(DOCKER_USER)/$(REPO_NAME):rasp --load $(FLINK_RASP)
@@ -47,15 +36,15 @@ clean:
 
 on_local:
 	docker stack deploy -c ./flink/local/flink-stack.yml flink
-	docker stack deploy -c ./kafka_riotbench/kafka-stack.yml kafka
+	docker stack deploy -c ./kafka/kafka-stack.yml kafka
 
 on_rasp:
 	docker stack deploy -c ./flink/rasp/flink-stack.yml flink
-	docker stack deploy -c ./kafka_riotbench/kafka-stack.yml kafka
+	docker stack deploy -c ./kafka/kafka-stack.yml kafka
 
 on_trad:
 	docker stack deploy -c ./flink/tradicional/flink-stack.yml flink
-	docker stack deploy -c ./kafka_riotbench/kafka-stack.yml kafka
+	docker stack deploy -c ./kafka/kafka-stack.yml kafka
 
 off:
 	docker stack rm flink
