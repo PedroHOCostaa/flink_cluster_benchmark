@@ -11,7 +11,6 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net
-      - kafka_network
     deploy:
       placement:
         constraints:
@@ -27,7 +26,6 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net
-      - kafka_network
     deploy:
       placement:
         constraints:
@@ -43,7 +41,6 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net
-      - kafka_network
     deploy:
       placement:
         constraints:
@@ -59,7 +56,6 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net
-      - kafka_network
     deploy:
       placement:
         constraints:
@@ -68,5 +64,3 @@ services:
 networks:
   flink_net:
     driver: overlay
-  kafka_network:
-    external: true

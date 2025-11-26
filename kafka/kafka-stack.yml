@@ -50,7 +50,3 @@ services:
 
     tmpfs:
       - /var/lib/kafka/data
-
-networks:
-  kafka_network:
-    external: true
