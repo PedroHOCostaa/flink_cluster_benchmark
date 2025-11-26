@@ -4,8 +4,6 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.7.0
     hostname: kafka
-    networks:
-      - kafka_network
     ports:
       - "9092:9092" # Isso está correto (Host 9092 -> Container 9092)
     environment:
