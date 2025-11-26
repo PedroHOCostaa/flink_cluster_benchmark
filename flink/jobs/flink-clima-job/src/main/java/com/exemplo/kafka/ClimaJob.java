@@ -46,58 +46,58 @@ public class ClimaJob {
 
             // Dados que opcionais que iremos simular o tratamento de dados defeituosos 
             // [chuva pres rs temp ur dir_vento vel_vento so2 no2 hcnm hct ch4 co no nox o3 pm10 pm2_5]
-            if (builder.hasChuva() && builder.getChuva() == -999.0) {
+            if (builder.hasChuva() && builder.getChuva() == 0) {
                 builder.clearChuva(); 
             }
-            if (builder.hasPres() && builder.getPres() == -999.0) {
+            if (builder.hasPres() && builder.getPres() == 0) {
                 builder.clearPres(); 
             }
-            if (builder.hasRs() && builder.getRs() == -999.0) {
+            if (builder.hasRs() && builder.getRs() == 0) {
                 builder.clearRs(); 
             }
-            if (builder.hasTemp() && builder.getTemp() == -999.0) {
+            if (builder.hasTemp() && builder.getTemp() == 0) {
                 builder.clearTemp(); 
             }
-            if (builder.hasUr() && builder.getUr() == -999.0) {
+            if (builder.hasUr() && builder.getUr() == 0) {
                 builder.clearUr(); 
             }
-            if (builder.hasDirVento() && builder.getDirVento() == -999.0) {
+            if (builder.hasDirVento() && builder.getDirVento() == 0) {
                 builder.clearDirVento(); 
             }
-            if (builder.hasVelVento() && builder.getVelVento() == -999.0) {
+            if (builder.hasVelVento() && builder.getVelVento() == 0) {
                 builder.clearVelVento(); 
             }
-            if (builder.hasSo2() && builder.getSo2() == -999.0) {
+            if (builder.hasSo2() && builder.getSo2() == 0) {
                 builder.clearSo2(); 
             }
-            if (builder.hasNo2() && builder.getNo2() == -999.0) {
+            if (builder.hasNo2() && builder.getNo2() == 0) {
                 builder.clearNo2(); 
             }
-            if (builder.hasHcnm() && builder.getHcnm() == -999.0) {
+            if (builder.hasHcnm() && builder.getHcnm() == 0) {
                 builder.clearHcnm(); 
             }
-            if (builder.hasHct() && builder.getHct() == -999.0) {
+            if (builder.hasHct() && builder.getHct() == 0) {
                 builder.clearHct(); 
             }
-            if (builder.hasCh4() && builder.getCh4() == -999.0) {
+            if (builder.hasCh4() && builder.getCh4() == 0) {
                 builder.clearCh4(); 
             }
-            if (builder.hasCo() && builder.getCo() == -999.0) {
+            if (builder.hasCo() && builder.getCo() == 0) {
                 builder.clearCo(); 
             }
-            if (builder.hasNo() && builder.getNo() == -999.0) {
+            if (builder.hasNo() && builder.getNo() == 0) {
                 builder.clearNo(); 
             }
-            if (builder.hasNox() && builder.getNox() == -999.0) {
+            if (builder.hasNox() && builder.getNox() == 0) {
                 builder.clearNox(); 
             }
-            if (builder.hasO3() && builder.getO3() == -999.0) {
+            if (builder.hasO3() && builder.getO3() == 0) {
                 builder.clearO3(); 
             }
-            if (builder.hasPm10() && builder.getPm10() == -999.0) {
+            if (builder.hasPm10() && builder.getPm10() == 0) {
                 builder.clearPm10(); 
             }
-            if (builder.hasPm25() && builder.getPm25() == -999.0) {
+            if (builder.hasPm25() && builder.getPm25() == 0) {
                 builder.clearPm25(); 
             }
             
