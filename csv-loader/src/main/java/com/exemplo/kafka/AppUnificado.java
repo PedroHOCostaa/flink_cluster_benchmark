@@ -3,6 +3,7 @@ package com.exemplo.kafka;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,15 +30,16 @@ import com.opencsv.CSVWriter;
 public class AppUnificado {
 
     // --- CONFIGURAÇÕES ---
-    // Ajuste o IP conforme necessário (localhost ou IP da rede docker)
     private static final String KAFKA_BROKER = "172.16.16.3:9092"; 
     private static final String CSV_INPUT = "dados.csv";
     private static final String CSV_OUTPUT = "saida_kafka.csv";
+    private static final String THROUGHPUT_LOG = "throughput.txt"; // Arquivo de log
 
     private static final String TOPIC_PRODUCER = "topic-clima-entrada"; 
     private static final String TOPIC_CONSUMER = "topic-clima-saida";
     private static final String GROUP_MONITOR = "grupo-monitor-throughput";
     private static final String GROUP_CSV_EXPORT = "grupo-csv-exporter";
+    private static final String GROUP_LOGGER = "grupo-throughput-logger";
 
     public static void main(String[] args) {
         // Validação básica de argumentos
@@ -46,12 +48,12 @@ public class AppUnificado {
             System.exit(1);
         }
 
-        String modoLeitura = args[0].toLowerCase(); // normal | exportador
+        String modoLeitura = args[0].toLowerCase(); // normal | exportador | logger
         String modoEscrita = args[1].toLowerCase(); // fixo | stress
 
         // Validação Modo Leitura
-        if (!modoLeitura.equals("normal") && !modoLeitura.equals("exportador")) {
-            System.err.println("Erro: Modo de leitura deve ser 'normal' ou 'exportador'.");
+        if (!modoLeitura.equals("normal") && !modoLeitura.equals("exportador") && !modoLeitura.equals("logger")) {
+            System.err.println("Erro: Modo de leitura deve ser 'normal', 'exportador' ou 'logger'.");
             System.exit(1);
         }
 
@@ -61,7 +63,7 @@ public class AppUnificado {
 
         if (modoEscrita.equals("stress")) {
             isStress = true;
-            taxaProdutor = 10000; // Valor inicial do stress conforme solicitado
+            taxaProdutor = 10000; 
         } else if (modoEscrita.equals("fixo")) {
             if (args.length < 3) {
                 System.err.println("Erro: Para modo 'fixo', informe a taxa. Ex: fixo 20000");
@@ -80,29 +82,34 @@ public class AppUnificado {
 
         // --- INICIALIZAÇÃO ---
         System.out.println("========== CONFIGURAÇÃO INICIADA ==========");
-        System.out.println("-> Modo Leitura (Topic Saída): " + modoLeitura.toUpperCase());
-        System.out.println("-> Modo Escrita (Topic Entrada): " + modoEscrita.toUpperCase());
+        System.out.println("-> Modo Leitura: " + modoLeitura.toUpperCase());
+        System.out.println("-> Modo Escrita: " + modoEscrita.toUpperCase());
         System.out.println("-> Taxa Inicial Produtor: " + taxaProdutor + " msg/s");
         System.out.println("===========================================");
 
         ExecutorService executor = Executors.newCachedThreadPool();
 
-        // 1. Inicia Produtor (Sempre roda, conforme lógica definida)
+        // 1. Inicia Produtor
         executor.submit(new ProducerTask(taxaProdutor, isStress));
 
         // 2. Inicia Consumidor (Baseado no modo)
-        if (modoLeitura.equals("exportador")) {
-            executor.submit(new CsvExporterTask());
-        } else {
-            executor.submit(new MonitorTask());
+        switch (modoLeitura) {
+            case "exportador":
+                executor.submit(new CsvExporterTask());
+                break;
+            case "logger":
+                executor.submit(new ThroughputLoggerTask());
+                break;
+            default: // normal
+                executor.submit(new MonitorTask());
+                break;
         }
     }
 
     private static void exibirAjuda() {
         System.out.println("Uso incorreto. Exemplos:");
         System.out.println("  java -jar app.jar normal stress");
-        System.out.println("  java -jar app.jar exportador stress");
-        System.out.println("  java -jar app.jar normal fixo 20000");
+        System.out.println("  java -jar app.jar logger stress");
         System.out.println("  java -jar app.jar exportador fixo 20000");
     }
 
@@ -126,24 +133,22 @@ public class AppUnificado {
             props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER);
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
-            // Otimizações para alto throughput
             props.put(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(64 * 1024));
             props.put(ProducerConfig.LINGER_MS_CONFIG, "10");
             props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
 
-            // Callback para logar erros de conexão
             try (KafkaProducer<String, byte[]> producer = new KafkaProducer<>(props)) {
-                System.out.println("[PRODUTOR] Carregando CSV para memória...");
+                System.out.println("[PRODUTOR] Carregando CSV...");
                 List<byte[]> cache = new ArrayList<>();
                 try (CSVReader reader = new CSVReader(new FileReader(CSV_INPUT))) {
                     String[] line;
-                    reader.readNext(); // Pular Header
+                    reader.readNext(); 
                     while ((line = reader.readNext()) != null) {
                         cache.add(buildProtoFromCsv(line).toByteArray());
                     }
                 } catch (Exception e) { e.printStackTrace(); return; }
 
-                System.out.println("[PRODUTOR] Envio iniciado...");
+                System.out.println("[PRODUTOR] Iniciado.");
 
                 long startWindow = System.currentTimeMillis();
                 long lastStressUpdate = System.currentTimeMillis();
@@ -167,7 +172,7 @@ public class AppUnificado {
 
                             if (stressMode && (now - lastStressUpdate > stressIntervalMs)) {
                                 currentRateLimit += stressStep;
-                                System.out.println(">>> [PRODUTOR-STRESS] Taxa aumentada para: " + currentRateLimit + " msg/s");
+                                System.out.println(">>> [PRODUTOR-STRESS] Nova taxa: " + currentRateLimit);
                                 lastStressUpdate = now;
                             }
                         }
@@ -176,7 +181,6 @@ public class AppUnificado {
             }
         }
 
-        // Builder Protobuf (Mantendo campos vazios como unset)
         private ClimaRegistro buildProtoFromCsv(String[] cols) {
             ClimaRegistro.Builder b = ClimaRegistro.newBuilder();
             if (hasVal(cols, 0)) b.setObjectid(Long.parseLong(cols[0]));
@@ -213,7 +217,7 @@ public class AppUnificado {
     }
 
     // =================================================================================
-    // TAREFA MONITOR (Modo Normal: Apenas Throughput, sem disco)
+    // TAREFA MONITOR (Modo Normal: Tela)
     // =================================================================================
     static class MonitorTask implements Runnable {
         @Override
@@ -227,19 +231,19 @@ public class AppUnificado {
 
             try (KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<>(props)) {
                 consumer.subscribe(Collections.singletonList(TOPIC_CONSUMER));
-                System.out.println("[MONITOR] Iniciado. Aguardando dados no tópico de saída...");
+                System.out.println("[MONITOR] Iniciado. Exibindo na tela.");
                 
                 long startWindow = System.currentTimeMillis();
                 long msgCount = 0;
 
                 while (!Thread.currentThread().isInterrupted()) {
                     ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofMillis(100));
-                    msgCount += records.count(); // Operação rápida, sem parse
+                    msgCount += records.count();
 
                     long now = System.currentTimeMillis();
                     if (now - startWindow >= 1000) {
                         double rate = msgCount / ((now - startWindow) / 1000.0);
-                        if (rate > 0) System.out.printf(">>> [LEITURA-NORMAL] Throughput: %.0f msgs/s%n", rate);
+                        if (rate > 0) System.out.printf(">>> [THROUGHPUT] %.0f msgs/s%n", rate);
                         startWindow = now;
                         msgCount = 0;
                     }
@@ -249,7 +253,56 @@ public class AppUnificado {
     }
 
     // =================================================================================
-    // TAREFA EXPORTADOR (Modo Exportador: Throughput + Gravação CSV)
+    // NOVO: TAREFA LOGGER (Salva Throughput em Arquivo TXT - Silencioso no Console)
+    // =================================================================================
+    static class ThroughputLoggerTask implements Runnable {
+        @Override
+        public void run() {
+            Properties props = new Properties();
+            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER);
+            props.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_LOGGER);
+            props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
+            props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
+            props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+
+            try (KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<>(props);
+                 PrintWriter writer = new PrintWriter(new FileWriter(THROUGHPUT_LOG))) {
+                
+                consumer.subscribe(Collections.singletonList(TOPIC_CONSUMER));
+                // Apenas um aviso inicial
+                System.out.println("[LOGGER] Iniciado. Salvando taxas em " + THROUGHPUT_LOG + " (Sem output no console).");
+                
+                // Cabeçalho do arquivo
+                writer.println("timestamp_unix,throughput_msgs_sec");
+                writer.flush();
+
+                long startWindow = System.currentTimeMillis();
+                long msgCount = 0;
+
+                while (!Thread.currentThread().isInterrupted()) {
+                    ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofMillis(100));
+                    msgCount += records.count();
+
+                    long now = System.currentTimeMillis();
+                    if (now - startWindow >= 1000) {
+                        double rate = msgCount / ((now - startWindow) / 1000.0);
+                        
+                        // Escreve no arquivo: Timestamp do Sistema, Valor
+                        writer.println(now + "," + (int)rate);
+                        writer.flush(); // Importante para salvar em tempo real
+
+                        startWindow = now;
+                        msgCount = 0;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // =================================================================================
+    // TAREFA EXPORTADOR (CSV dos Dados + Throughput na tela)
     // =================================================================================
     static class CsvExporterTask implements Runnable {
         @Override
@@ -269,36 +322,27 @@ public class AppUnificado {
                 String[] header = {"objectid","data","codnum","estacao","chuva","pres","rs","temp","ur","dir_vento","vel_vento","so2","no2","hcnm","hct","ch4","co","no","nox","o3","pm10","pm2_5","lat","lon","x_utm","y_utm"};
                 writer.writeNext(header);
 
-                System.out.println("[EXPORTADOR] Iniciado. Gravando em " + CSV_OUTPUT);
+                System.out.println("[EXPORTADOR] Gravando dados em " + CSV_OUTPUT);
                 
                 long startWindow = System.currentTimeMillis();
                 long msgCountWindow = 0;
-                long totalCount = 0;
 
                 while (!Thread.currentThread().isInterrupted()) {
                     ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofMillis(100));
-                    
                     for (ConsumerRecord<byte[], byte[]> record : records) {
                         try {
-                            // Parse Protobuf
                             ClimaRegistro reg = ClimaRegistro.parseFrom(record.value());
-                            // Grava no CSV
                             writer.writeNext(convertProtoToStrings(reg));
-                            
                             msgCountWindow++;
-                            totalCount++;
                         } catch (Exception e) {}
                     }
-                    
-                    // Flush periódico para garantir gravação
                     if (!records.isEmpty()) writer.flush();
 
-                    // Calculo do Throughput (Igual ao Monitor)
                     long now = System.currentTimeMillis();
                     if (now - startWindow >= 1000) {
                         double rate = msgCountWindow / ((now - startWindow) / 1000.0);
                         if (rate > 0) {
-                            System.out.printf(">>> [LEITURA-EXPORTADOR] Throughput: %.0f msgs/s | Total Gravado: %d%n", rate, totalCount);
+                            System.out.printf(">>> [EXPORTADOR] Throughput: %.0f msgs/s%n", rate);
                         }
                         startWindow = now;
                         msgCountWindow = 0;
@@ -307,7 +351,6 @@ public class AppUnificado {
             } catch (IOException e) { e.printStackTrace(); }
         }
 
-        // Converte respeitando os Nulos (hasField ? valor : "")
         private String[] convertProtoToStrings(ClimaRegistro r) {
             return new String[] {
                 String.valueOf(r.getObjectid()),
