@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package com.exemplo.kafka;
+
+option java_package = "com.exemplo.kafka.proto";
+option java_outer_classname = "ClimaDataProto";
+
+message ClimaRegistro {
+  int64 objectid = 1;
+  string data = 2; 
+  optional int32 codnum = 3;
+  optional string estacao = 4;
+  
+  optional double chuva = 5;
+  optional double pres = 6;
+  optional double rs = 7;
+  optional double temp = 8;
+  optional double ur = 9;
+  optional double dir_vento = 10;
+  optional double vel_vento = 11;
+  optional double so2 = 12;
+  optional double no2 = 13;
+  optional double hcnm = 14;
+  optional double hct = 15;
+  optional double ch4 = 16;
+  optional double co = 17;
+  optional double no = 18;
+  optional double nox = 19;
+  optional double o3 = 20;
+  optional double pm10 = 21;
+  optional double pm2_5 = 22;
+  
+  optional double lat = 23;
+  optional double lon = 24;
+  optional double x_utm_sirgas2000 = 25;
+  optional double y_utm_sirgas2000 = 26;
+}

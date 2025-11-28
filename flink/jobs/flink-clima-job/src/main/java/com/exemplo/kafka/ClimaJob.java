@@ -108,9 +108,16 @@ public class ClimaJob {
         // 4. Configurando a SAÍDA (Sink) com Particionamento Customizado
         KafkaSink<ClimaRegistro> sink = KafkaSink.<ClimaRegistro>builder()
                 .setBootstrapServers(bootstrapServers)
-                .setRecordSerializer(new ClimaProtoPartitionerSerializer(outputTopic))
-                // Opcional: Configurações de entrega (Delivery Guarantee) podem ser adicionadas aqui
-                .build();
+        .setRecordSerializer(new ClimaProtoPartitionerSerializer(outputTopic))
+        
+        // --- OBRIGATÓRIO PARA ALTO FLUXO ---
+        .setProperty("linger.ms", "20")    // Espera 20ms para encher o lote
+        .setProperty("batch.size", "32768") // Lote de 32KB (aumentei para render mais)
+        
+        // --- SEGURANÇA ---
+        .setProperty("delivery.timeout.ms", "300000") // 5 minutos de tolerância
+        .setProperty("acks", "1") // Confirmação rápida
+        .build();
 
         processedStream.sinkTo(sink);
 
