@@ -1,0 +1,12 @@
+2025-11-27 20:10:06.653 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:10:12.008 WARNING (MainThread) [homeassistant.components.http.ban] Login attempt or request with invalid authentication from localhost (127.0.0.1). Requested URL: '/api/websocket'. (Mozilla/5.0 (X11; Linux x86_64; rv:145.0) Gecko/20100101 Firefox/145.0)
+2025-11-27 20:10:12.127 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:10:22.364 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:10:42.557 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:11:22.739 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:12:43.146 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:14:03.312 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:15:23.645 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:16:44.143 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:18:04.443 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'
+2025-11-27 20:19:24.667 ERROR (MainThread) [habluetooth.scanner] hci0 (80:38:FB:F7:14:E8): Failed to force stop scanner: 'NoneType' object has no attribute 'send'

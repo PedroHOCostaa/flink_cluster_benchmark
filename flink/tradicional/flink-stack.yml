@@ -1,8 +1,9 @@
 version: "3.8"
 
 services:
+
   jobmanager:
-    image: flink-with-kafka-trad:2.0
+    image: pedrohocostaa/iot-stream-flink-benchmark:trad
     command: jobmanager
     ports:
       - "8081:8081"
@@ -10,26 +11,41 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net
-      - kafka_network
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints:
+          - node.hostname == tradicional-1
 
-  taskmanager:
-    image: flink-with-kafka-trad:2.0
+  taskmanager_4gb_node2:
+    image: pedrohocostaa/iot-stream-flink-benchmark:trad
     command: taskmanager
-    depends_on:
-      - jobmanager
     environment:
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net
-      - kafka_network
     deploy:
-      replicas: 2
+      placement:
+        constraints:
+          - node.hostname == tradicional-1
+
+  taskmanager_8gb_node:
+    image: pedrohocostaa/iot-stream-flink-benchmark:trad
+    command: taskmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.numberOfTaskSlots: 4
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    networks:
+      - flink_net
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == tradicional-2
 
 networks:
   flink_net:
     driver: overlay
-  kafka_network:
-    external: true

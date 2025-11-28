@@ -284,7 +284,7 @@ public class AppUnificado {
                     msgCount += records.count();
 
                     long now = System.currentTimeMillis();
-                    if (now - startWindow >= 1000) {
+                    if (now - startWindow >= 10000) {
                         double rate = msgCount / ((now - startWindow) / 1000.0);
                         
                         // Escreve no arquivo: Timestamp do Sistema, Valor
