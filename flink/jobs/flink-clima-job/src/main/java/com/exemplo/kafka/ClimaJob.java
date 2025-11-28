@@ -108,16 +108,25 @@ public class ClimaJob {
         // 4. Configurando a SAÍDA (Sink) com Particionamento Customizado
         KafkaSink<ClimaRegistro> sink = KafkaSink.<ClimaRegistro>builder()
                 .setBootstrapServers(bootstrapServers)
-        .setRecordSerializer(new ClimaProtoPartitionerSerializer(outputTopic))
-        
-        // --- OBRIGATÓRIO PARA ALTO FLUXO ---
-        .setProperty("linger.ms", "20")    // Espera 20ms para encher o lote
-        .setProperty("batch.size", "32768") // Lote de 32KB (aumentei para render mais)
-        
-        // --- SEGURANÇA ---
-        .setProperty("delivery.timeout.ms", "300000") // 5 minutos de tolerância
-        .setProperty("acks", "1") // Confirmação rápida
-        .build();
+                .setRecordSerializer(new ClimaProtoPartitionerSerializer(outputTopic))
+                
+                // --- TUNING ANTI-BACKPRESSURE ---
+                
+                // 1. Compressão: Envia menos bytes, alivia o disco do Kafka
+                .setProperty("compression.type", "lz4") 
+                
+                // 2. Buffer Maior: Aguenta picos de produção sem travar a thread
+                .setProperty("buffer.memory", "67108864") // 64MB
+                
+                // 3. Performance Pura (Sem garantias pesadas)
+                .setProperty("enable.idempotence", "false") // OBRIGATÓRIO para acks=1 funcionar
+                .setProperty("acks", "1")
+                
+                // 4. Batching (Agrupamento)
+                .setProperty("batch.size", "65536") // 64KB (Aumentei um pouco pq comprimimos)
+                .setProperty("linger.ms", "20")
+                
+                .build();
 
         processedStream.sinkTo(sink);
 
