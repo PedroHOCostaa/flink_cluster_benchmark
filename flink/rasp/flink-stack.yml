@@ -52,7 +52,7 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        taskmanager.numberOfTaskSlots: 4
+        taskmanager.numberOfTaskSlots: 3
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
     networks:
       - flink_net

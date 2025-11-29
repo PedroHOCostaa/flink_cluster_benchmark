@@ -21,3 +21,14 @@ kafka-topics --create --topic topic-clima-entrada --bootstrap-server 172.16.16.3
 kafka-topics --create --topic topic-clima-saida --bootstrap-server 172.16.16.3:9092 --partitions 12 --replication-factor 1
 ```
 
+
+### Tópicos Utilizados no teste 2
+```bash
+kafka-topics --create --topic topic-clima-entrada --bootstrap-server 172.16.16.3:9092 --partitions 8 --replication-factor 1
+kafka-topics --create --topic topic-clima-saida --bootstrap-server 172.16.16.3:9092 --partitions 12 --replication-factor 1
+```
+
+### Deletar Tópico
+```bash
+kafka-topics --delete --topic topic-clima-entrada --bootstrap-server 172.16.16.3:9092
+```
