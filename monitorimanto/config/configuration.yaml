@@ -9,3 +9,15 @@ frontend:
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
+
+influxdb:
+  host: 127.0.0.1
+  port: 8086
+  database: homeassistant
+  username: admin
+  password: admin
+  max_retries: 5
+  include:
+    domains:
+      - sensor
+      - switch
